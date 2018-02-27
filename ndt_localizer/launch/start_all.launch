@@ -1,0 +1,7 @@
+<launch>
+  <include file="$(find ndt_localizer)/launch/pcd_publisher.launch" ns="pcd" />
+  <include file="$(find ndt_localizer)/launch/tf_localizer.launch" ns="nm"/>
+  <include file="$(find ndt_localizer)/launch/points_downsample.launch" ns="vx" />
+<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find ndt_localizer)/config/default.rviz"/>
+
+</launch>

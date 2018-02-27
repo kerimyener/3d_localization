@@ -1,0 +1,8 @@
+<launch>
+        <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pub" output="screen" args=" /home/kyy/Documents/0034.pcd"  >
+        <remap from="/cloud_pcd" to="points_map"/>
+        <param name="frame_id" value="/map" />
+        </node>
+        <node pkg="tf" type="static_transform_publisher" name="world_to_map" args="0 0 0 0 0 0 /world /map 10" />
+
+</launch>
