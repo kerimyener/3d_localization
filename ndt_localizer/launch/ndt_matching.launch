@@ -14,7 +14,15 @@
   <arg name="use_gpu" default="false" />
   <arg name="sync" default="false" />
   <!--arg name="imu_topic" default="/imu_raw" /-->
-  
+     <rosparam>
+       localizer: velodyne
+       tf_x: 0
+       tf_y: 0
+       tf_z: 0
+       tf_roll: 0
+       tf_pitch: 0
+       tf_yaw: 0
+     </rosparam>  
   <node pkg="ndt_localizer" type="ndt_matching" name="ndt_matching" output="screen" unless="$(arg use_openmp)">
     <param name="use_gnss" value="$(arg use_gnss)" />
     <param name="use_imu" value="$(arg use_imu)" />
@@ -29,13 +37,7 @@
     <param name="use_openmp" value="$(arg use_openmp)" />
     <!--param name="imu_topic" value="$(arg imu_topic)" /-->
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
-     <rosparam>
-       localizer: velodyne
-     </rosparam>
-  </node>
 
-  <node pkg="rosbag" type="play" name="player"  args="/home/kyy/Documents/kitti_2011_09_30_drive_0034_synced.bag">
-    <param name="use_sim_time" value="true" />
   </node>
 
 </launch>

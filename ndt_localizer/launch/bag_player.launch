@@ -1,0 +1,5 @@
+<launch>  
+<node pkg="rosbag" type="play" name="player"  args="/home/kyy/Documents/kitti_2011_09_30_drive_0034_synced.bag">
+    <param name="use_sim_time" value="true" />
+  </node>
+</launch>
