@@ -1,4 +1,8 @@
 <launch>
-  <arg name="area" default="1x1" />
-  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="$(arg area) download" />
+  <arg name="area" default="noupdate" />
+  <arg name="pcd_paths" default= "/home/kyy/Documents/34.pcd"/>
+  <node name="points_map_loader" pkg="map_file" type="points_map_loader" output="screen" args="$(arg area) download ">
+    <param name="area" value="$(arg area)"/>
+    <param name="pcd_paths" value= "$(arg pcd_paths)"/>
+  </node>
 </launch>

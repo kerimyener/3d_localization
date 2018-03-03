@@ -218,7 +218,7 @@ int download(GetFile gf, const std::string& tmp, const std::string& loc, const s
 	return gf.GetHTTPFile(loc + filename);
 }
 
-void download_map()
+/*void download_map()
 {
 	while (true) {
 		geometry_msgs::Point p = request_queue.dequeue();
@@ -278,7 +278,7 @@ void download_map()
 			}
 		}
 	}
-}
+}*/
 
 sensor_msgs::PointCloud2 create_pcd(const geometry_msgs::Point& p)
 {
@@ -434,6 +434,8 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "points_map_loader");
 
 	ros::NodeHandle n;
+  ros::NodeHandle private_n("~");
+
 
 	if (argc < 3) {
 		print_usage();
@@ -460,10 +462,12 @@ int main(int argc, char **argv)
 
 	std::string arealist_path;
 	std::vector<std::string> pcd_paths;
+  private_n.getParam("pcd_paths",pcd_paths);
 	if (margin < 0) {
 		can_download = false;
 		for (int i = 2; i < argc; ++i) {
-			std::string path(argv[i]);
+      std::string path;
+      private_n.getParam("pcd_paths",path);
 			pcd_paths.push_back(path);
 		}
 	} else {
