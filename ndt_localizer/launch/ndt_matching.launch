@@ -2,7 +2,7 @@
 <launch>
 
   <arg name="use_gnss" default="0" />
-  <arg name="use_imu" default="false" />
+  <arg name="use_imu" default="true" />
   <arg name="use_odom" default="false" />
   <arg name="imu_upside_down" default="false" />
   <arg name="queue_size" default="10" />
@@ -13,7 +13,7 @@
   <arg name="use_fast_pcl" default="false" />
   <arg name="use_gpu" default="false" />
   <arg name="sync" default="false" />
-  <!--arg name="imu_topic" default="/imu_raw" /-->
+  <arg name="imu_topic" default="/kitti/oxts/imu" />
      <rosparam>
        localizer: velodyne
        tf_x: 0
@@ -35,7 +35,7 @@
     <param name="use_fast_pcl" value="$(arg use_fast_pcl)" />
     <param name="use_gpu" value="$(arg use_gpu)" />
     <param name="use_openmp" value="$(arg use_openmp)" />
-    <!--param name="imu_topic" value="$(arg imu_topic)" /-->
+    <param name="imu_topic" value="$(arg imu_topic)" />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
 
   </node>

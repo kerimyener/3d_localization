@@ -1,4 +1,5 @@
 <launch>
+
   <arg name="sync" default="false" />
   <arg name="node_name" default="voxel_grid_filter" />
   <arg name="points_topic" default="points_raw" />

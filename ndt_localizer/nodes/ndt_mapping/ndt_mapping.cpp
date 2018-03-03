@@ -784,6 +784,31 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   current_pose_pub.publish(current_pose_msg);
 
+
+  std::string filename = "kitti34_";
+  std::cout << "output_callback" << std::endl;
+  //std::cout << "filter_res: " << filter_res << std::endl;
+  std::cout << "filename: " << filename << std::endl;
+
+  //pcl::PointCloud<pcl::PointXYZI>::Ptr map_ptr(new pcl::PointCloud<pcl::PointXYZI>(map));
+  pcl::PointCloud<pcl::PointXYZI>::Ptr map_filtered(new pcl::PointCloud<pcl::PointXYZI>());
+  map_ptr->header.frame_id = "map";
+  map_filtered->header.frame_id = "map";
+  //sensor_msgs::PointCloud2::Ptr map_msg_ptr(new sensor_msgs::PointCloud2);
+
+  // Apply voxelgrid filter
+    std::cout << "Original: " << map_ptr->points.size() << " points." << std::endl;
+    pcl::toROSMsg(*map_ptr, *map_msg_ptr);
+
+
+  ndt_map_pub.publish(*map_msg_ptr);
+
+  // Writing Point Cloud data to PCD file
+
+    pcl::io::savePCDFileASCII(filename, *map_ptr);
+    std::cout << "Saved " << map_ptr->points.size() << " data points to " << filename << "." << std::endl;
+
+
   std::cout << "-----------------------------------------------------------------" << std::endl;
   std::cout << "Sequence number: " << input->header.seq << std::endl;
   std::cout << "Number of scan points: " << scan_ptr->size() << " points." << std::endl;
@@ -956,8 +981,8 @@ int main(int argc, char** argv)
   //ros::Subscriber param_sub = nh.subscribe("config/ndt_mapping", 10, param_callback);
   //ros::Subscriber output_sub = nh.subscribe("config/ndt_mapping_output", 10, output_callback);
   ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
-  ros::Subscriber odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
-  ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
+  //ros::Subscriber odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
+  //ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
 
   ros::spin();
 
