@@ -173,32 +173,13 @@ static int final_num_iteration;
 static sensor_msgs::Imu imu;
 static nav_msgs::Odometry odom;
 
-/*static void param_callback(const autoware_msgs::ConfigNdtMapping::ConstPtr& input)
-{
-  ndt_res = input->resolution;
-  step_size = input->step_size;
-  trans_eps = input->trans_epsilon;
-  max_iter = input->max_iterations;
-  voxel_leaf_size = input->leaf_size;
-  min_scan_range = input->min_scan_range;
-  min_add_scan_shift = input->min_add_scan_shift;
 
-  std::cout << "param_callback" << std::endl;
-  std::cout << "ndt_res: " << ndt_res << std::endl;
-  std::cout << "step_size: " << step_size << std::endl;
-  std::cout << "trans_epsilon: " << trans_eps << std::endl;
-  std::cout << "max_iter: " << max_iter << std::endl;
-  std::cout << "voxel_leaf_size: " << voxel_leaf_size << std::endl;
-  std::cout << "min_scan_range: " << min_scan_range << std::endl;
-  std::cout << "min_add_scan_shift: " << min_add_scan_shift << std::endl;
-}*/
-
-/*static void output_callback(const autoware_msgs::ConfigNdtMappingOutput::ConstPtr& input)
+static void output_callback(const std_msgs::Bool& input)
 {
-  double filter_res = input->filter_res;
-  std::string filename = input->filename;
+  //double filter_res = input->filter_res;
+  std::string filename = "34.pcd";
   std::cout << "output_callback" << std::endl;
-  std::cout << "filter_res: " << filter_res << std::endl;
+  //std::cout << "filter_res: " << filter_res << std::endl;
   std::cout << "filename: " << filename << std::endl;
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr map_ptr(new pcl::PointCloud<pcl::PointXYZI>(map));
@@ -207,37 +188,19 @@ static nav_msgs::Odometry odom;
   map_filtered->header.frame_id = "map";
   sensor_msgs::PointCloud2::Ptr map_msg_ptr(new sensor_msgs::PointCloud2);
 
-  // Apply voxelgrid filter
-  if (filter_res == 0.0)
-  {
+
     std::cout << "Original: " << map_ptr->points.size() << " points." << std::endl;
     pcl::toROSMsg(*map_ptr, *map_msg_ptr);
-  }
-  else
-  {
-    pcl::VoxelGrid<pcl::PointXYZI> voxel_grid_filter;
-    voxel_grid_filter.setLeafSize(filter_res, filter_res, filter_res);
-    voxel_grid_filter.setInputCloud(map_ptr);
-    voxel_grid_filter.filter(*map_filtered);
-    std::cout << "Original: " << map_ptr->points.size() << " points." << std::endl;
-    std::cout << "Filtered: " << map_filtered->points.size() << " points." << std::endl;
-    pcl::toROSMsg(*map_filtered, *map_msg_ptr);
-  }
+
 
   ndt_map_pub.publish(*map_msg_ptr);
 
   // Writing Point Cloud data to PCD file
-  if (filter_res == 0.0)
-  {
+
     pcl::io::savePCDFileASCII(filename, *map_ptr);
     std::cout << "Saved " << map_ptr->points.size() << " data points to " << filename << "." << std::endl;
-  }
-  else
-  {
-    pcl::io::savePCDFileASCII(filename, *map_filtered);
-    std::cout << "Saved " << map_filtered->points.size() << " data points to " << filename << "." << std::endl;
-  }
-}*/
+
+}
 
 static void imu_odom_calc(ros::Time current_time)
 {
@@ -785,30 +748,6 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   current_pose_pub.publish(current_pose_msg);
 
 
-  std::string filename = "kitti34_";
-  std::cout << "output_callback" << std::endl;
-  //std::cout << "filter_res: " << filter_res << std::endl;
-  std::cout << "filename: " << filename << std::endl;
-
-  //pcl::PointCloud<pcl::PointXYZI>::Ptr map_ptr(new pcl::PointCloud<pcl::PointXYZI>(map));
-  pcl::PointCloud<pcl::PointXYZI>::Ptr map_filtered(new pcl::PointCloud<pcl::PointXYZI>());
-  map_ptr->header.frame_id = "map";
-  map_filtered->header.frame_id = "map";
-  //sensor_msgs::PointCloud2::Ptr map_msg_ptr(new sensor_msgs::PointCloud2);
-
-  // Apply voxelgrid filter
-    std::cout << "Original: " << map_ptr->points.size() << " points." << std::endl;
-    pcl::toROSMsg(*map_ptr, *map_msg_ptr);
-
-
-  ndt_map_pub.publish(*map_msg_ptr);
-
-  // Writing Point Cloud data to PCD file
-
-    pcl::io::savePCDFileASCII(filename, *map_ptr);
-    std::cout << "Saved " << map_ptr->points.size() << " data points to " << filename << "." << std::endl;
-
-
   std::cout << "-----------------------------------------------------------------" << std::endl;
   std::cout << "Sequence number: " << input->header.seq << std::endl;
   std::cout << "Number of scan points: " << scan_ptr->size() << " points." << std::endl;
@@ -978,8 +917,7 @@ int main(int argc, char** argv)
   ndt_map_pub = nh.advertise<sensor_msgs::PointCloud2>("/ndt_map", 1000);
   current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 1000);
 
-  //ros::Subscriber param_sub = nh.subscribe("config/ndt_mapping", 10, param_callback);
-  //ros::Subscriber output_sub = nh.subscribe("config/ndt_mapping_output", 10, output_callback);
+  ros::Subscriber output_sub = nh.subscribe("/save", 10, output_callback);
   ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
   //ros::Subscriber odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
   //ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);

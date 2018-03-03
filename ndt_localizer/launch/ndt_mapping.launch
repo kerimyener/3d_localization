@@ -20,24 +20,15 @@
   <!-- rosrun ndt_localizer ndt_mapping  -->
   <node pkg="ndt_localizer" type="queue_counter" name="queue_counter" output="screen"/>
   <node pkg="ndt_localizer" type="ndt_mapping" name="ndt_mapping" output="screen" unless="$(arg use_openmp)">
-    <!--param name="use_gpu" value="$(arg use_gpu)" />
-    <param name="use_fast_pcl" value="$(arg use_fast_pcl)" />
-    <param name="use_openmp" value="$(arg use_openmp)" />
-    <param name="use_imu" value="$(arg use_imu)" />
-    <param name="use_odom" value="$(arg use_odom)" />
-    <param name="imu_upside_down" value="$(arg imu_upside_down)" />
-    <param name="imu_topic" value="$(arg imu_topic)" /-->
-  </node>
-
-  <node pkg="ndt_localizer" type="ndt_mapping_omp" name="ndt_mapping_omp" output="screen" if="$(arg use_openmp)">
     <param name="use_gpu" value="$(arg use_gpu)" />
     <param name="use_fast_pcl" value="$(arg use_fast_pcl)" />
     <param name="use_openmp" value="$(arg use_openmp)" />
     <param name="use_imu" value="$(arg use_imu)" />
     <param name="use_odom" value="$(arg use_odom)" />
     <param name="imu_upside_down" value="$(arg imu_upside_down)" />
-    <param name="imu_topic" value="$(arg imu_topic)" />
+    <!--param name="imu_topic" value="$(arg imu_topic)" /-->
   </node>
+
   <node
    pkg="rosbag" type="play" name="player"  args="--clock /media/kyy/104632FA4632E060/kitti_2011_09_30_drive_0034_synced.bag">
   </node>

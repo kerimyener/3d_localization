@@ -46,7 +46,8 @@
 
 static int enqueue = 0;
 static int dequeue = 0;
-
+std_msgs::Bool save;
+ros::Publisher pub;
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
 	enqueue++;
@@ -56,7 +57,13 @@ static void ndt_map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
 	dequeue++;
 
-	std::cout << "(Processed/Input): (" << dequeue << " / " << enqueue << ")" << std::endl;
+
+  if (dequeue==1224)
+     {save.data=true;
+     pub.publish(save);}
+  else
+    std::cout << "(Processed/Input): (" << dequeue << " / " << enqueue << ")" << std::endl;
+
 }
 
 int main(int argc, char **argv)
@@ -68,6 +75,8 @@ int main(int argc, char **argv)
 
     ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
     ros::Subscriber ndt_map_sub = nh.subscribe("ndt_map", 100000, ndt_map_callback);
+    if(save.data != false)
+    ros::Publisher pub = nh.advertise<std_msgs::Bool>("save",1);
 
     ros::spin();
 
