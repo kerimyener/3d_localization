@@ -3,7 +3,7 @@
   <name>ndt_localizer</name>
   <version>1.6.1</version>
   <description>The ndt_localizer package</description>
-  <maintainer email="yurtdas.kyener@gmail">kyy</maintainer>
+  <maintainer email="yurtdas.kyener@gmail.com">kyy</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
   

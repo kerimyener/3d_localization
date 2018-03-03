@@ -2,7 +2,7 @@
 
 namespace ndt{
 
- void NDT_MAPP::output_callback(const std_msgs::Bool& input)
+void NDT_MAPP::output_callback(const std_msgs::Bool& input)
 {
   //double filter_res = input->filter_res;
   std::string filename = "34.pcd";
@@ -17,22 +17,22 @@ namespace ndt{
   sensor_msgs::PointCloud2::Ptr map_msg_ptr(new sensor_msgs::PointCloud2);
 
 
-    std::cout << "Original: " << map_ptr->points.size() << " points." << std::endl;
-    pcl::toROSMsg(*map_ptr, *map_msg_ptr);
+  std::cout << "Original: " << map_ptr->points.size() << " points." << std::endl;
+  pcl::toROSMsg(*map_ptr, *map_msg_ptr);
 
 
   ndt_map_pub.publish(*map_msg_ptr);
 
   // Writing Point Cloud data to PCD file
 
-    pcl::io::savePCDFileASCII(filename, *map_ptr);
-    std::cout << "Saved " << map_ptr->points.size() << " data points to " << filename << "." << std::endl;
+  pcl::io::savePCDFileASCII(filename, *map_ptr);
+  std::cout << "Saved " << map_ptr->points.size() << " data points to " << filename << "." << std::endl;
 
 }
 
- void NDT_MAPP::imu_odom_calc(ros::Time current_time)
+void NDT_MAPP::imu_odom_calc(ros::Time current_time)
 {
-   ros::Time previous_time = current_time;
+  ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
   double diff_imu_roll = imu.angular_velocity.x * diff_time;
@@ -62,9 +62,9 @@ namespace ndt{
   previous_time = current_time;
 }
 
- void NDT_MAPP::odom_calc(ros::Time current_time)
+void NDT_MAPP::odom_calc(ros::Time current_time)
 {
-   ros::Time previous_time = current_time;
+  ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
   double diff_odom_roll = odom.twist.twist.angular.x * diff_time;
@@ -94,9 +94,9 @@ namespace ndt{
   previous_time = current_time;
 }
 
- void NDT_MAPP::imu_calc(ros::Time current_time)
+void NDT_MAPP::imu_calc(ros::Time current_time)
 {
-   ros::Time previous_time = current_time;
+  ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
   double diff_imu_roll = imu.angular_velocity.x * diff_time;
@@ -109,9 +109,9 @@ namespace ndt{
 
   double accX1 = imu.linear_acceleration.x;
   double accY1 = std::cos(current_pose_imu.roll) * imu.linear_acceleration.y -
-                 std::sin(current_pose_imu.roll) * imu.linear_acceleration.z;
+      std::sin(current_pose_imu.roll) * imu.linear_acceleration.z;
   double accZ1 = std::sin(current_pose_imu.roll) * imu.linear_acceleration.y +
-                 std::cos(current_pose_imu.roll) * imu.linear_acceleration.z;
+      std::cos(current_pose_imu.roll) * imu.linear_acceleration.z;
 
   double accX2 = std::sin(current_pose_imu.pitch) * accZ1 + std::cos(current_pose_imu.pitch) * accX1;
   double accY2 = accY1;
@@ -143,7 +143,7 @@ namespace ndt{
   previous_time = current_time;
 }
 
- double NDT_MAPP::wrapToPm(double a_num, const double a_max)
+double NDT_MAPP::wrapToPm(double a_num, const double a_max)
 {
   if (a_num >= a_max)
   {
@@ -152,12 +152,12 @@ namespace ndt{
   return a_num;
 }
 
- double NDT_MAPP::wrapToPmPi(double a_angle_rad)
+double NDT_MAPP::wrapToPmPi(double a_angle_rad)
 {
   return wrapToPm(a_angle_rad, M_PI);
 }
 
- void NDT_MAPP::odom_callback(const nav_msgs::Odometry::ConstPtr& input)
+void NDT_MAPP::odom_callback(const nav_msgs::Odometry::ConstPtr& input)
 {
   // std::cout << __func__ << std::endl;
 
@@ -165,7 +165,7 @@ namespace ndt{
   odom_calc(input->header.stamp);
 }
 
- void NDT_MAPP::imuUpsideDown(const sensor_msgs::Imu::Ptr input)
+void NDT_MAPP::imuUpsideDown(const sensor_msgs::Imu::Ptr input)
 {
   double input_roll, input_pitch, input_yaw;
 
@@ -188,7 +188,7 @@ namespace ndt{
   input->orientation = tf::createQuaternionMsgFromRollPitchYaw(input_roll, input_pitch, input_yaw);
 }
 
- void NDT_MAPP::imu_callback(const sensor_msgs::Imu::Ptr& input)
+void NDT_MAPP::imu_callback(const sensor_msgs::Imu::Ptr& input)
 {
   // std::cout << __func__ << std::endl;
 
@@ -196,7 +196,7 @@ namespace ndt{
     imuUpsideDown(input);
 
   const ros::Time current_time = input->header.stamp;
-   ros::Time previous_time = current_time;
+  ros::Time previous_time = current_time;
   const double diff_time = (current_time - previous_time).toSec();
 
   double imu_roll, imu_pitch, imu_yaw;
@@ -208,7 +208,7 @@ namespace ndt{
   imu_pitch = wrapToPmPi(imu_pitch);
   imu_yaw = wrapToPmPi(imu_yaw);
 
-   double previous_imu_roll = imu_roll, previous_imu_pitch = imu_pitch, previous_imu_yaw = imu_yaw;
+  double previous_imu_roll = imu_roll, previous_imu_pitch = imu_pitch, previous_imu_yaw = imu_yaw;
   const double diff_imu_roll = imu_roll - previous_imu_roll;
 
   const double diff_imu_pitch = imu_pitch - previous_imu_pitch;
@@ -252,7 +252,7 @@ namespace ndt{
   previous_imu_yaw = imu_yaw;
 }
 
- void NDT_MAPP::points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
+void NDT_MAPP::points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
   double r;
   pcl::PointXYZI p;
@@ -302,34 +302,34 @@ namespace ndt{
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr map_ptr(new pcl::PointCloud<pcl::PointXYZI>(map));
 
-  #ifdef CUDA_FOUND
-    if (_use_gpu == true)
+#ifdef CUDA_FOUND
+  if (_use_gpu == true)
+  {
+    gpu_ndt.setTransformationEpsilon(trans_eps);
+    gpu_ndt.setStepSize(step_size);
+    gpu_ndt.setResolution(ndt_res);
+    gpu_ndt.setMaximumIterations(max_iter);
+    gpu_ndt.setInputSource(filtered_scan_ptr);
+  }
+  else
+#endif
+  {
+    if (_use_fast_pcl)
     {
-      gpu_ndt.setTransformationEpsilon(trans_eps);
-      gpu_ndt.setStepSize(step_size);
-      gpu_ndt.setResolution(ndt_res);
-      gpu_ndt.setMaximumIterations(max_iter);
-      gpu_ndt.setInputSource(filtered_scan_ptr);
+      cpu_ndt.setTransformationEpsilon(trans_eps);
+      cpu_ndt.setStepSize(step_size);
+      cpu_ndt.setResolution(ndt_res);
+      cpu_ndt.setMaximumIterations(max_iter);
+      cpu_ndt.setInputSource(filtered_scan_ptr);
     }
     else
-  #endif
-  {
-	  if (_use_fast_pcl)
-	  {
-        cpu_ndt.setTransformationEpsilon(trans_eps);
-  		cpu_ndt.setStepSize(step_size);
-  		cpu_ndt.setResolution(ndt_res);
-  		cpu_ndt.setMaximumIterations(max_iter);
-  		cpu_ndt.setInputSource(filtered_scan_ptr);
-	  }
-	  else
-	  {
-        ndt.setTransformationEpsilon(trans_eps);
-		ndt.setStepSize(step_size);
-		ndt.setResolution(ndt_res);
-		ndt.setMaximumIterations(max_iter);
-		ndt.setInputSource(filtered_scan_ptr);
-	  }
+    {
+      ndt.setTransformationEpsilon(trans_eps);
+      ndt.setStepSize(step_size);
+      ndt.setResolution(ndt_res);
+      ndt.setMaximumIterations(max_iter);
+      ndt.setInputSource(filtered_scan_ptr);
+    }
   }
 
   if (isMapUpdate == true)
@@ -342,14 +342,14 @@ namespace ndt{
     else
 #endif
     {
-    	if (_use_fast_pcl)
-    	{
-          cpu_ndt.setInputTarget(map_ptr);
-    	}
-		else
-		{
-          ndt.setInputTarget(map_ptr);
-		}
+      if (_use_fast_pcl)
+      {
+        cpu_ndt.setInputTarget(map_ptr);
+      }
+      else
+      {
+        ndt.setInputTarget(map_ptr);
+      }
     }
 
     isMapUpdate = false;
@@ -395,17 +395,17 @@ namespace ndt{
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZI>);
 
-  #ifdef CUDA_FOUND
-    if (_use_gpu == true)
-    {
-      gpu_ndt.align(init_guess);
-      t_localizer = gpu_ndt.getFinalTransformation();
-      has_converged = gpu_ndt.hasConverged();
-      fitness_score = gpu_ndt.getFitnessScore();
-      final_num_iteration = ndt.getFinalNumIteration();
-    }
-    else
-  #endif
+#ifdef CUDA_FOUND
+  if (_use_gpu == true)
+  {
+    gpu_ndt.align(init_guess);
+    t_localizer = gpu_ndt.getFinalTransformation();
+    has_converged = gpu_ndt.hasConverged();
+    fitness_score = gpu_ndt.getFitnessScore();
+    final_num_iteration = ndt.getFinalNumIteration();
+  }
+  else
+#endif
     if (_use_fast_pcl)
     {
       cpu_ndt.align(init_guess);
@@ -416,13 +416,13 @@ namespace ndt{
     }
     else
     {
-      #ifdef USE_FAST_PCL
-        ndt.omp_align(*output_cloud, init_guess);
-        fitness_score = ndt.omp_getFitnessScore();
-      #else
-        ndt.align(*output_cloud, init_guess);
-        fitness_score = ndt.getFitnessScore();
-      #endif
+#ifdef USE_FAST_PCL
+      ndt.omp_align(*output_cloud, init_guess);
+      fitness_score = ndt.omp_getFitnessScore();
+#else
+      ndt.align(*output_cloud, init_guess);
+      fitness_score = ndt.getFitnessScore();
+#endif
       t_localizer = ndt.getFinalTransformation();
       has_converged = ndt.hasConverged();
       final_num_iteration = ndt.getFinalNumIteration();
@@ -593,7 +593,7 @@ namespace ndt{
   std::cout << "shift: " << shift << std::endl;
   std::cout << "-----------------------------------------------------------------" << std::endl;
   _systemInited=true;
- }
+}
 
 bool NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   
@@ -754,12 +754,7 @@ bool NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
     imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
     rate.sleep();
 
-}
-
-void NDT_MAPP::spin()
-{
-
   }
 }
 
-}
+
