@@ -40,7 +40,7 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
   LIBRARIES ndt_pcl fast_pcl
   CATKIN_DEPENDS std_msgs velodyne_pointcloud  ${FAST_PCL_PACKAGES}
  
@@ -58,15 +58,16 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 add_executable(ndt_matching nodes/ndt_matching/ndt_matching.cpp)
-add_executable(ndt_mapping nodes/ndt_mapping/ndt_mapping.cpp)
+add_executable(ndt_mapping_node nodes/ndt_mapping/ndt_mapping_node.cpp)
+
 add_executable(voxel_grid_filter nodes/voxel_grid_filter/voxel_grid_filter.cpp)
 target_link_libraries(ndt_matching ${catkin_LIBRARIES})
-target_link_libraries(ndt_mapping ${catkin_LIBRARIES})
+target_link_libraries(ndt_mapping_node ${catkin_LIBRARIES})
 
 
 if(CUDA_FOUND)
   target_include_directories(ndt_matching PRIVATE ${CUDA_INCLUDE_DIRS})
-  target_include_directories(ndt_mapping PRIVATE ${CUDA_INCLUDE_DIRS})
+  target_include_directories(ndt_mapping_node PRIVATE ${CUDA_INCLUDE_DIRS})
 endif()
 
 

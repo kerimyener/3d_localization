@@ -1,180 +1,8 @@
-/*
- *  Copyright (c) 2015, Nagoya University
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- *  * Neither the name of Autoware nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+#include "ndt_mapping.hh"
 
-/*
- Localization and mapping program using Normal Distributions Transform
+namespace ndt{
 
- Yuki KITSUKAWA
- */
-
-#define OUTPUT  // If you want to output "position_log.txt", "#define OUTPUT".
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-
-#include <nav_msgs/Odometry.h>
-#include <ros/ros.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Float32.h>
-#include <velodyne_pointcloud/point_types.h>
-#include <velodyne_pointcloud/rawdata.h>
-
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_datatypes.h>
-
-#include <pcl/io/io.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-
-#ifdef USE_FAST_PCL
-  #include <fast_pcl/filters/voxel_grid.h>
-  #include <fast_pcl/registration/ndt.h>
-#else
-  #include <pcl/filters/voxel_grid.h>
-  #include <pcl/registration/ndt.h>
-#endif
-
-
-#ifdef CUDA_FOUND
-  #include <fast_pcl/ndt_gpu/NormalDistributionsTransform.h>
-#endif
-
-#include <fast_pcl/ndt_cpu/NormalDistributionsTransform.h>
-
-#include <time.h>
-
-
-struct pose
-{
-  double x;
-  double y;
-  double z;
-  double roll;
-  double pitch;
-  double yaw;
-};
-
-// global variables
-static pose previous_pose, guess_pose, guess_pose_imu, guess_pose_odom, guess_pose_imu_odom, current_pose,
-    current_pose_imu, current_pose_odom, current_pose_imu_odom, ndt_pose, added_pose, localizer_pose;
-
-static ros::Time current_scan_time;
-static ros::Time previous_scan_time;
-static ros::Duration scan_duration;
-
-static double diff = 0.0;
-static double diff_x = 0.0, diff_y = 0.0, diff_z = 0.0, diff_yaw;  // current_pose - previous_pose
-static double offset_imu_x, offset_imu_y, offset_imu_z, offset_imu_roll, offset_imu_pitch, offset_imu_yaw;
-static double offset_odom_x, offset_odom_y, offset_odom_z, offset_odom_roll, offset_odom_pitch, offset_odom_yaw;
-static double offset_imu_odom_x, offset_imu_odom_y, offset_imu_odom_z, offset_imu_odom_roll, offset_imu_odom_pitch,
-    offset_imu_odom_yaw;
-
-static double current_velocity_x = 0.0;
-static double current_velocity_y = 0.0;
-static double current_velocity_z = 0.0;
-
-static double current_velocity_imu_x = 0.0;
-static double current_velocity_imu_y = 0.0;
-static double current_velocity_imu_z = 0.0;
-
-static pcl::PointCloud<pcl::PointXYZI> map;
-
-// Added for GPU ndt
-#ifdef CUDA_FOUND
-static gpu::GNormalDistributionsTransform gpu_ndt;
-#endif
-
-// Added for CPU ndt testing version
-static cpu::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI> cpu_ndt;
-
-static pcl::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI> ndt;
-// end of adding
-
-// Default values
-static int max_iter = 30;        // Maximum iterations
-static float ndt_res = 1.0;      // Resolution
-static double step_size = 0.1;   // Step size
-static double trans_eps = 0.01;  // Transformation epsilon
-
-// Leaf size of VoxelGrid filter.
-static double voxel_leaf_size = 2.0;
-
-static ros::Time callback_start, callback_end, t1_start, t1_end, t2_start, t2_end, t3_start, t3_end, t4_start, t4_end,
-    t5_start, t5_end;
-static ros::Duration d_callback, d1, d2, d3, d4, d5;
-
-static ros::Publisher ndt_map_pub;
-static ros::Publisher current_pose_pub;
-static ros::Publisher guess_pose_linaer_pub;
-static geometry_msgs::PoseStamped current_pose_msg, guess_pose_msg;
-
-static ros::Publisher ndt_stat_pub;
-static std_msgs::Bool ndt_stat_msg;
-
-static int initial_scan_loaded = 0;
-
-static Eigen::Matrix4f gnss_transform = Eigen::Matrix4f::Identity();
-
-static double min_scan_range = 5.0;
-static double min_add_scan_shift = 1.0;
-
-static double _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
-static Eigen::Matrix4f tf_btol, tf_ltob;
-
-static bool isMapUpdate = true;
-
-static bool _use_openmp = false;
-static bool _use_gpu = false;
-
-static bool _use_fast_pcl = false;
-
-static bool _use_imu = false;
-static bool _use_odom = false;
-static bool _imu_upside_down = false;
-
-static std::string _imu_topic = "/imu_raw";
-
-static double fitness_score;
-static bool has_converged;
-static int final_num_iteration;
-
-static sensor_msgs::Imu imu;
-static nav_msgs::Odometry odom;
-
-
-static void output_callback(const std_msgs::Bool& input)
+ void NDT_MAPP::output_callback(const std_msgs::Bool& input)
 {
   //double filter_res = input->filter_res;
   std::string filename = "34.pcd";
@@ -202,9 +30,9 @@ static void output_callback(const std_msgs::Bool& input)
 
 }
 
-static void imu_odom_calc(ros::Time current_time)
+ void NDT_MAPP::imu_odom_calc(ros::Time current_time)
 {
-  static ros::Time previous_time = current_time;
+   ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
   double diff_imu_roll = imu.angular_velocity.x * diff_time;
@@ -234,9 +62,9 @@ static void imu_odom_calc(ros::Time current_time)
   previous_time = current_time;
 }
 
-static void odom_calc(ros::Time current_time)
+ void NDT_MAPP::odom_calc(ros::Time current_time)
 {
-  static ros::Time previous_time = current_time;
+   ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
   double diff_odom_roll = odom.twist.twist.angular.x * diff_time;
@@ -266,9 +94,9 @@ static void odom_calc(ros::Time current_time)
   previous_time = current_time;
 }
 
-static void imu_calc(ros::Time current_time)
+ void NDT_MAPP::imu_calc(ros::Time current_time)
 {
-  static ros::Time previous_time = current_time;
+   ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
   double diff_imu_roll = imu.angular_velocity.x * diff_time;
@@ -315,7 +143,7 @@ static void imu_calc(ros::Time current_time)
   previous_time = current_time;
 }
 
-static double wrapToPm(double a_num, const double a_max)
+ double NDT_MAPP::wrapToPm(double a_num, const double a_max)
 {
   if (a_num >= a_max)
   {
@@ -324,12 +152,12 @@ static double wrapToPm(double a_num, const double a_max)
   return a_num;
 }
 
-static double wrapToPmPi(double a_angle_rad)
+ double NDT_MAPP::wrapToPmPi(double a_angle_rad)
 {
   return wrapToPm(a_angle_rad, M_PI);
 }
 
-static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
+ void NDT_MAPP::odom_callback(const nav_msgs::Odometry::ConstPtr& input)
 {
   // std::cout << __func__ << std::endl;
 
@@ -337,7 +165,7 @@ static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
   odom_calc(input->header.stamp);
 }
 
-static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
+ void NDT_MAPP::imuUpsideDown(const sensor_msgs::Imu::Ptr input)
 {
   double input_roll, input_pitch, input_yaw;
 
@@ -360,7 +188,7 @@ static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
   input->orientation = tf::createQuaternionMsgFromRollPitchYaw(input_roll, input_pitch, input_yaw);
 }
 
-static void imu_callback(const sensor_msgs::Imu::Ptr& input)
+ void NDT_MAPP::imu_callback(const sensor_msgs::Imu::Ptr& input)
 {
   // std::cout << __func__ << std::endl;
 
@@ -368,7 +196,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
     imuUpsideDown(input);
 
   const ros::Time current_time = input->header.stamp;
-  static ros::Time previous_time = current_time;
+   ros::Time previous_time = current_time;
   const double diff_time = (current_time - previous_time).toSec();
 
   double imu_roll, imu_pitch, imu_yaw;
@@ -380,7 +208,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   imu_pitch = wrapToPmPi(imu_pitch);
   imu_yaw = wrapToPmPi(imu_yaw);
 
-  static double previous_imu_roll = imu_roll, previous_imu_pitch = imu_pitch, previous_imu_yaw = imu_yaw;
+   double previous_imu_roll = imu_roll, previous_imu_pitch = imu_pitch, previous_imu_yaw = imu_yaw;
   const double diff_imu_roll = imu_roll - previous_imu_roll;
 
   const double diff_imu_pitch = imu_pitch - previous_imu_pitch;
@@ -424,7 +252,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   previous_imu_yaw = imu_yaw;
 }
 
-static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
+ void NDT_MAPP::points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
   double r;
   pcl::PointXYZI p;
@@ -764,10 +592,11 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   std::cout << t_localizer << std::endl;
   std::cout << "shift: " << shift << std::endl;
   std::cout << "-----------------------------------------------------------------" << std::endl;
-}
+  _systemInited=true;
+ }
 
-int main(int argc, char** argv)
-{
+bool NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
+  
   previous_pose.x = 0.0;
   previous_pose.y = 0.0;
   previous_pose.z = 0.0;
@@ -836,12 +665,6 @@ int main(int argc, char** argv)
   offset_imu_odom_pitch = 0.0;
   offset_imu_odom_yaw = 0.0;
 
-  ros::init(argc, argv, "ndt_mapping");
-
-  ros::NodeHandle nh;
-  ros::NodeHandle private_nh("~");
-
-// setting parameters
   private_nh.getParam("use_gpu", _use_gpu);
   private_nh.getParam("use_openmp", _use_openmp);
   private_nh.getParam("use_fast_pcl", _use_fast_pcl);
@@ -917,12 +740,26 @@ int main(int argc, char** argv)
   ndt_map_pub = nh.advertise<sensor_msgs::PointCloud2>("/ndt_map", 1000);
   current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 1000);
 
-  ros::Subscriber output_sub = nh.subscribe("/save", 10, output_callback);
-  ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
-  //ros::Subscriber odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
-  //ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
 
-  ros::spin();
+  ros::Rate rate(100);
+  bool status = ros::ok();
 
-  return 0;
+  // loop until shutdown
+  while (status) {
+    ros::spinOnce();
+    status = ros::ok();
+    output_sub = nh.subscribe("/save", 10, output_callback);
+    points_sub = nh.subscribe("points_raw", 100000, points_callback);
+    odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
+    imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
+    rate.sleep();
+
+}
+
+void NDT_MAPP::spin()
+{
+
+  }
+}
+
 }

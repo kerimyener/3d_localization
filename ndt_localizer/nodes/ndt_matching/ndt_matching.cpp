@@ -1658,11 +1658,11 @@ int main(int argc, char** argv)
   // Subscribers
   //ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
   //ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  //ros::Subscriber map_sub = nh.subscribe("points_map", 10, map_callback);
+  ros::Subscriber map_sub = nh.subscribe("points_map", 10, map_callback);
   //ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1000, initialpose_callback);
   ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
   //ros::Subscriber odom_sub = nh.subscribe("/odom_pose", _queue_size * 10, odom_callback);
-  //ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
+  ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
