@@ -19,7 +19,7 @@
 
   <!-- rosrun ndt_localizer ndt_mapping  -->
   <node pkg="ndt_localizer" type="queue_counter" name="queue_counter" output="screen"/>
-  <node pkg="ndt_localizer" type="ndt_mapping" name="ndt_mapping" output="screen" unless="$(arg use_openmp)">
+  <node pkg="ndt_localizer" type="ndt_mapping_node" name="ndt_mapping" output="screen" unless="$(arg use_openmp)">
     <param name="use_gpu" value="$(arg use_gpu)" />
     <param name="use_fast_pcl" value="$(arg use_fast_pcl)" />
     <param name="use_openmp" value="$(arg use_openmp)" />

@@ -592,10 +592,10 @@ void NDT_MAPP::points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   std::cout << t_localizer << std::endl;
   std::cout << "shift: " << shift << std::endl;
   std::cout << "-----------------------------------------------------------------" << std::endl;
-  _systemInited=true;
+
 }
 
-bool NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
+void NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   
   previous_pose.x = 0.0;
   previous_pose.y = 0.0;
@@ -684,32 +684,32 @@ bool NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   if (nh.getParam("tf_x", _tf_x) == false)
   {
     std::cout << "tf_x is not set." << std::endl;
-    return 1;
+
   }
   if (nh.getParam("tf_y", _tf_y) == false)
   {
     std::cout << "tf_y is not set." << std::endl;
-    return 1;
+
   }
   if (nh.getParam("tf_z", _tf_z) == false)
   {
     std::cout << "tf_z is not set." << std::endl;
-    return 1;
+
   }
   if (nh.getParam("tf_roll", _tf_roll) == false)
   {
     std::cout << "tf_roll is not set." << std::endl;
-    return 1;
+
   }
   if (nh.getParam("tf_pitch", _tf_pitch) == false)
   {
     std::cout << "tf_pitch is not set." << std::endl;
-    return 1;
+
   }
   if (nh.getParam("tf_yaw", _tf_yaw) == false)
   {
     std::cout << "tf_yaw is not set." << std::endl;
-    return 1;
+
   }
 
 #if defined(CUDA_FOUND) && defined(USE_FAST_PCL)
@@ -740,21 +740,12 @@ bool NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   ndt_map_pub = nh.advertise<sensor_msgs::PointCloud2>("/ndt_map", 1000);
   current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 1000);
 
+  output_sub = nh.subscribe("/save", 10, &NDT_MAPP::output_callback,this);
+  points_sub = nh.subscribe("points_raw", 100000, &NDT_MAPP::points_callback,this);
+  odom_sub = nh.subscribe("/odom_pose", 100000,  &NDT_MAPP::odom_callback,this);
+  imu_sub = nh.subscribe(_imu_topic, 100000,  &NDT_MAPP::imu_callback,this);
+}
 
-  ros::Rate rate(100);
-  bool status = ros::ok();
-
-  // loop until shutdown
-  while (status) {
-    ros::spinOnce();
-    status = ros::ok();
-    output_sub = nh.subscribe("/save", 10, output_callback);
-    points_sub = nh.subscribe("points_raw", 100000, points_callback);
-    odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
-    imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
-    rate.sleep();
-
-  }
 }
 
 

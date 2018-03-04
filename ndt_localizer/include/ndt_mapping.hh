@@ -53,6 +53,7 @@ public:
   void imuUpsideDown(const sensor_msgs::Imu::Ptr input);
   void imu_callback(const sensor_msgs::Imu::Ptr& input);
   void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input);
+
 private:
   struct pose{
     double x;
@@ -145,6 +146,7 @@ private:
   ros::Subscriber points_sub ;
   ros::Subscriber odom_sub ;
   ros::Subscriber imu_sub ;
+
   ros::Time callback_start, callback_end, t1_start, t1_end, t2_start, t2_end, t3_start, t3_end, t4_start, t4_end,
   t5_start, t5_end;
   ros::Duration d_callback, d1, d2, d3, d4, d5;
@@ -152,7 +154,7 @@ private:
   ros::Publisher ndt_map_pub;
   ros::Publisher current_pose_pub;
   ros::Publisher guess_pose_linaer_pub;
-  bool _systemInited;
+
 };
 }
 #endif
