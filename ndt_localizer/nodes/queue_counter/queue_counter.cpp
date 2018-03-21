@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
-    ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
+    ros::Subscriber points_sub = nh.subscribe("/velodyne/velodyne_points", 100000, points_callback);
     ros::Subscriber ndt_map_sub = nh.subscribe("ndt_map", 100000, ndt_map_callback);
     pub = nh.advertise<std_msgs::Bool>("save",10000000);
 

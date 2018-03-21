@@ -672,6 +672,7 @@ void NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
+  private_nh.getParam("velodyme_topic", _velodyne_topic);
 
   std::cout << "use_imu: " << _use_imu << std::endl;
   std::cout << "use_gpu: " << _use_gpu << std::endl;
@@ -741,7 +742,7 @@ void NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 1000);
 
   output_sub = nh.subscribe("/save", 10, &NDT_MAPP::output_callback,this);
-  points_sub = nh.subscribe("points_raw", 100000, &NDT_MAPP::points_callback,this);
+  points_sub = nh.subscribe(_velodyne_topic, 100000, &NDT_MAPP::points_callback,this);
   odom_sub = nh.subscribe("/odom_pose", 100000,  &NDT_MAPP::odom_callback,this);
   imu_sub = nh.subscribe(_imu_topic, 100000,  &NDT_MAPP::imu_callback,this);
 }
