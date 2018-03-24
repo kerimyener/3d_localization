@@ -18,12 +18,6 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_package(CUDA)
-if(CUDA_FOUND)
-    add_definitions(-DCUDA_FOUND)
-    list(APPEND FAST_PCL_PACKAGES ndt_gpu)
-endif()
-
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -65,10 +59,6 @@ target_link_libraries(ndt_matching_node ${catkin_LIBRARIES} )
 target_link_libraries(ndt_mapping_node ${catkin_LIBRARIES} )
 
 
-if(CUDA_FOUND)
-  target_include_directories(ndt_matching_node PRIVATE ${CUDA_INCLUDE_DIRS})
-  target_include_directories(ndt_mapping_node PRIVATE ${CUDA_INCLUDE_DIRS})
-endif()
 
 
 add_dependencies(voxel_grid_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -134,7 +134,7 @@ private:
   bool _imu_upside_down = false;
 
   std::string _imu_topic = "/imu_raw";
-  std::string _velodyne_topic = "/velodyne/velodyne_points";
+  std::string _velodyne_topic = "velodyne/velodyne_points";
   double fitness_score;
   bool has_converged;
   int final_num_iteration;

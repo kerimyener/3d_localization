@@ -4,6 +4,9 @@ namespace ndt{
 
 void NDT_MAPP::output_callback(const std_msgs::Bool& input)
 {
+  if (input.data!=true)
+    return;
+  else{
   //double filter_res = input->filter_res;
   std::string filename = "34.pcd";
   std::cout << "output_callback" << std::endl;
@@ -27,7 +30,7 @@ void NDT_MAPP::output_callback(const std_msgs::Bool& input)
 
   pcl::io::savePCDFileASCII(filename, *map_ptr);
   std::cout << "Saved " << map_ptr->points.size() << " data points to " << filename << "." << std::endl;
-
+  }
 }
 
 void NDT_MAPP::imu_odom_calc(ros::Time current_time)
@@ -741,10 +744,10 @@ void NDT_MAPP::setup(ros::NodeHandle &nh, ros::NodeHandle &private_nh){
   ndt_map_pub = nh.advertise<sensor_msgs::PointCloud2>("/ndt_map", 1000);
   current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 1000);
 
-  output_sub = nh.subscribe("/save", 10, &NDT_MAPP::output_callback,this);
+  output_sub = nh.subscribe("/save", 100000, &NDT_MAPP::output_callback,this);
   points_sub = nh.subscribe(_velodyne_topic, 100000, &NDT_MAPP::points_callback,this);
-  odom_sub = nh.subscribe("/odom_pose", 100000,  &NDT_MAPP::odom_callback,this);
-  imu_sub = nh.subscribe(_imu_topic, 100000,  &NDT_MAPP::imu_callback,this);
+  //odom_sub = nh.subscribe("/odom_pose", 100000,  &NDT_MAPP::odom_callback,this);
+  //imu_sub = nh.subscribe(_imu_topic, 100000,  &NDT_MAPP::imu_callback,this);
 }
 
 }

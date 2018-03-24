@@ -57,16 +57,11 @@ static void ndt_map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
 	dequeue++;
 
-
-  if (dequeue < 1225)
-     {save.data=true;
-     pub.publish(save);
-     std::cout << "saved \n"<< std::endl;
-     std::cout << "(Processed/Input): (" << dequeue << " / " << enqueue << ")" << std::endl;
-  }
-  else
-    std::cout << "(Processed/Input): (" << dequeue << " / " << enqueue << ")" << std::endl;
-
+        save.data=true;
+       	pub.publish(save);
+	std::cout << "(Processed/Input): (" << dequeue << " / " << enqueue << ")" << std::endl;
+     	std::cout << "saved \n"<< std::endl;
+      
 }
 
 int main(int argc, char **argv)
@@ -78,7 +73,7 @@ int main(int argc, char **argv)
 
     ros::Subscriber points_sub = nh.subscribe("/velodyne/velodyne_points", 100000, points_callback);
     ros::Subscriber ndt_map_sub = nh.subscribe("ndt_map", 100000, ndt_map_callback);
-    pub = nh.advertise<std_msgs::Bool>("save",10000000);
+    pub = nh.advertise<std_msgs::Bool>("save",100000);
 
     ros::spin();
 
