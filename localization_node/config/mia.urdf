@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<robot name="mia">
+    <link name="base_link" />
+    <link name="velodyne" />
+    <link name="velodyne_gps" />
+    <link name="xsens_mt0" />
+    <link name="xsens_mt1" />
+    <link name="ibeo_scala_b3" />
+    <link name="mobileye" />
+<!--    <link name="hokuyo_front" />-->
+    <link name="hokuyo_rear" />
+    <link name="camera" /> <!--randomly named as camera it can be changed--> 
+    <link name="mesh">
+        <visual>
+            <origin xyz="2.87 -0.475 0.9" rpy="1.57079633 0 4.71238898" />
+            <geometry>
+                <mesh filename="package://cermcity_nodes/config/mia.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+            <material name="light grey">
+                <color rgba="0.8 0.8 .8 1"/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="base_to_xsens_rigt" type="fixed"> <!--realtive to driver-->
+        <parent link="base_link"/>
+        <child link="xsens_mt1"/>
+        <origin xyz="-0.175 -0.005 1.64" rpy="0 0 0" />
+    </joint>
+
+    <joint name="base_to_xsens_left" type="fixed"> <!--realtive to driver-->
+        <parent link="base_link"/>
+        <child link="xsens_mt0"/>
+        <origin xyz="-0.175 0.005 1.64" rpy="0 0 0" />
+    </joint>
+
+    <joint name="base_to_velodyne_gps" type="fixed">
+        <parent link="base_link"/>
+        <child link="velodyne_gps"/>
+        <origin xyz="0.45 -0.245 1.615" rpy="0 0 0" />
+    </joint>
+
+    <joint name="base_to_velodyne" type="fixed">
+        <parent link="base_link"/>
+        <child link="velodyne"/>
+        <origin xyz="-0.175 0.0 2.03 " rpy="0.0 0.0 0.7" />
+    </joint>
+
+    <joint name="base_to_ibeo_scala" type="fixed">
+        <parent link="base_link"/>
+        <child link="ibeo_scala_b3"/>
+        <origin xyz="1.40 0 0.575" rpy="0 0 0" />
+    </joint>
+
+    <joint name="base_to_hokuyo_rear" type="fixed">
+        <parent link="base_link"/>
+        <child link="hokuyo_rear"/>
+        <origin xyz="-0.95 0 1.67" rpy="0 0.78539816339 3.14159265359" />
+    </joint>
+
+    <!--joint name="base_to_hokuyo_front" type="fixed">
+        <parent link="base_link"/>
+        <child link="hokuyo_front"/>
+        <origin xyz="1.40 0 0.6" rpy="0 0.78539816339 3.14159265359" />
+    </joint-->
+
+    <joint name="base_to_mobileye" type="fixed">
+        <parent link="base_link"/>
+        <child link="mobileye"/>
+        <origin xyz="1.125 0 1.075" rpy="0 0.0 0.0" />
+    </joint>
+
+    <joint name="mobileye_to_camera" type="fixed">
+        <parent link="mobileye"/>
+        <child link="camera"/>
+        <origin xyz="0 -0.115 0.01" rpy="0 0.0 0.0" />
+    </joint>
+    <joint name="base_to_mesh" type="fixed">
+        <parent link="base_link"/>
+        <child link="mesh"/>
+    </joint>
+</robot>
