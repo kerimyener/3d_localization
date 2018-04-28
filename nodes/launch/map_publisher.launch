@@ -1,0 +1,3 @@
+<launch>
+  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="noupdate /home/kyyurtdas/Documents/dfki_park_area.pcd" />
+</launch>

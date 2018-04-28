@@ -1,0 +1,16 @@
+<launch>
+  <arg name="sync" default="false" />
+  <arg name="node_name" default="voxel_grid_filter" />
+  <arg name="points_topic" default="/velodyne/velodyne_points" />
+  <arg name="output_log" default="false" />
+  <arg name="voxel_leaf_size" default="1.5" />
+  <arg name="measurement_range" default="120" />
+
+  <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)">
+    <param name="points_topic" value="$(arg points_topic)" />
+    <param name="voxel_leaf_size" value="$(arg voxel_leaf_size)" />
+    <param name="measurement_range" value="$(arg measurement_range)" />
+    <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
+    <param name="output_log" value="$(arg output_log)" />
+  </node>
+</launch>

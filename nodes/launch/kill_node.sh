@@ -1,0 +1,5 @@
+rosnode kill base_link_to_localizer
+rosnode kill ndt_matching
+rosnode kill points_map_loader
+rosnode kill voxel_grid_filter
+rosnode kill worl_to_map
