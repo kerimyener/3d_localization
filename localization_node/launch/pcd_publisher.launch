@@ -1,7 +1,0 @@
-<launch>
-
-        <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pub" output="screen" args=" /home/kyy/Documents/0034.pcd"  >
-        <remap from="/cloud_pcd" to="points_map"/>
-        </node>
-
-</launch>
