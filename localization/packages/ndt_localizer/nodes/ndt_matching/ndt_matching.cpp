@@ -38,6 +38,9 @@
 #include <fast_pcl/ndt_cpu/NormalDistributionsTransform.h>
 //End of adding
 
+#include "ndt_localizer/ndt_stat.h"
+
+
 #define PREDICT_POSE_THRESHOLD 0.5
 
 #define Wa 0.4
@@ -168,6 +171,8 @@ static std_msgs::Float32 time_ndt_matching;
 static int _queue_size = 1000;
 
 static ros::Publisher ndt_stat_pub;
+static ndt_localizer::ndt_stat ndt_stat_msg;
+
 
 static double predict_pose_error = 0.0;
 
@@ -1010,7 +1015,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     estimated_vel_pub.publish(estimate_vel_msg);
 
     // Set values for /ndt_stat
-    /*ndt_stat_msg.header.stamp = current_scan_time;
+  ndt_stat_msg.header.stamp = current_scan_time;
   ndt_stat_msg.exe_time = time_ndt_matching.data;
   ndt_stat_msg.iteration = iteration;
   ndt_stat_msg.score = fitness_score;
@@ -1018,7 +1023,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   ndt_stat_msg.acceleration = current_accel;
   ndt_stat_msg.use_predict_pose = 0;
 
-  ndt_stat_pub.publish(ndt_stat_msg);*/
+  ndt_stat_pub.publish(ndt_stat_msg);
     /* Compute NDT_Reliability */
     ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
         Wc * ((2.0 - trans_probability) / 2.0) * 100.0;
@@ -1132,7 +1137,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 }
 
-void* thread_func(void* args)
+/*void* thread_func(void* args)
 {
   ros::NodeHandle nh_map;
   ros::CallbackQueue map_callback_queue;
@@ -1145,7 +1150,7 @@ void* thread_func(void* args)
     map_callback_queue.callAvailable(ros::WallDuration());
     ros_rate.sleep();
   }
-}
+}*/
 
 int main(int argc, char** argv)
 {
@@ -1252,21 +1257,21 @@ int main(int argc, char** argv)
   estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);
   time_ndt_matching_pub = nh.advertise<std_msgs::Float32>("/time_ndt_matching", 10);
-  //ndt_stat_pub = nh.advertise<autoware_msgs::ndt_stat>("/ndt_stat", 10);
+  ndt_stat_pub = nh.advertise<ndt_localizer::ndt_stat>("/ndt_stat", 10);
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
   param_callback(nh);
   //ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
   ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  //  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
+  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback);
   ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
   ros::Subscriber odom_sub = nh.subscribe("/odom_pose", _queue_size * 10, odom_callback);
   ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
-  pthread_t thread;
-  pthread_create(&thread, NULL, thread_func, NULL);
+  //pthread_t thread;
+  //pthread_create(&thread, NULL, thread_func, NULL);
 
   ros::spin();
 

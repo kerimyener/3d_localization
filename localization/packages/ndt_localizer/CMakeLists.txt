@@ -20,15 +20,17 @@ find_package(catkin REQUIRED COMPONENTS
   velodyne_pointcloud
   ${FAST_PCL_PACKAGES}
   ndt_cpu
+  message_generation
 )
-
+add_message_files(FILES ndt_stat.msg)
+generate_messages(DEPENDENCIES std_msgs)
 ###################################
 ## catkin specific configuration ##
 ###################################
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ndt_pcl
-  CATKIN_DEPENDS std_msgs velodyne_pointcloud ${FAST_PCL_PACKAGES}
+  CATKIN_DEPENDS std_msgs velodyne_pointcloud ${FAST_PCL_PACKAGES} message_runtime
   DEPENDS ndt_cpu
 #  DEPENDS ndt_tku
 #  DEPENDS system_lib
