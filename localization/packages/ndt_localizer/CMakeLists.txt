@@ -19,18 +19,17 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   velodyne_pointcloud
   ${FAST_PCL_PACKAGES}
-  ndt_cpu
-  message_generation
+  ndt_cpu 
+  localization_msgs
 )
-add_message_files(FILES ndt_stat.msg)
-generate_messages(DEPENDENCIES std_msgs)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ndt_pcl
-  CATKIN_DEPENDS std_msgs velodyne_pointcloud ${FAST_PCL_PACKAGES} message_runtime
+  CATKIN_DEPENDS std_msgs velodyne_pointcloud ${FAST_PCL_PACKAGES} localization_msgs
   DEPENDS ndt_cpu
 #  DEPENDS ndt_tku
 #  DEPENDS system_lib
@@ -49,6 +48,7 @@ add_executable(ndt_matching nodes/ndt_matching/ndt_matching.cpp)
 #add_executable(ndt_mapping nodes/ndt_mapping/ndt_mapping.cpp)
 target_link_libraries(ndt_matching ${catkin_LIBRARIES})
 #target_link_libraries(ndt_mapping ${catkin_LIBRARIES})
+add_dependencies(ndt_matching localization_msgs_generate_messages_cpp)
 
 
 

@@ -2,7 +2,7 @@
   <arg name="x" default="-0.175"/>
   <arg name="y" default="0.0"/>
   <arg name="z" default="2.03"/>
-  <arg name="yaw" default="0.0"/>
+  <arg name="yaw" default="0.7"/>
   <arg name="pitch" default="0.0"/>
   <arg name="roll" default="0.0"/>
   <arg name="frame_id" default="base_link"/>

@@ -38,7 +38,7 @@
 #include <fast_pcl/ndt_cpu/NormalDistributionsTransform.h>
 //End of adding
 
-#include "ndt_localizer/ndt_stat.h"
+#include "localization_msgs/ndt_stat.h"
 
 
 #define PREDICT_POSE_THRESHOLD 0.5
@@ -171,7 +171,7 @@ static std_msgs::Float32 time_ndt_matching;
 static int _queue_size = 1000;
 
 static ros::Publisher ndt_stat_pub;
-static ndt_localizer::ndt_stat ndt_stat_msg;
+static localization_msgs::ndt_stat ndt_stat_msg;
 
 
 static double predict_pose_error = 0.0;
@@ -1257,7 +1257,7 @@ int main(int argc, char** argv)
   estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);
   time_ndt_matching_pub = nh.advertise<std_msgs::Float32>("/time_ndt_matching", 10);
-  ndt_stat_pub = nh.advertise<ndt_localizer::ndt_stat>("/ndt_stat", 10);
+  ndt_stat_pub = nh.advertise<localization_msgs::ndt_stat>("/ndt_stat", 10);
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers

@@ -64,7 +64,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl/filters/voxel_grid.h>
 
-#include "icp_localizer/icp_stat.h"
+#include "localization_msgs/icp_stat.h"
 
 #define PREDICT_POSE_THRESHOLD 0.5
 
@@ -169,7 +169,7 @@ static std_msgs::Float32 time_icp_matching;
 static int _queue_size = 1000;
 
 static ros::Publisher icp_stat_pub;
-static icp_localizer::icp_stat icp_stat_msg;
+static localization_msgs::icp_stat icp_stat_msg;
 
 static double predict_pose_error = 0.0;
 
@@ -778,7 +778,7 @@ int main(int argc, char** argv)
   estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 1000);
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 1000);
   time_icp_matching_pub = nh.advertise<std_msgs::Float32>("/time_icp_matching", 1000);
-  icp_stat_pub = nh.advertise<icp_localizer::icp_stat>("/icp_stat", 1000);
+  icp_stat_pub = nh.advertise<localization_msgs::icp_stat>("/icp_stat", 1000);
 
   // Subscribers
   //ros::Subscriber param_sub = nh.subscribe("config/icp", 10, param_callback);

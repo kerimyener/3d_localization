@@ -10,7 +10,7 @@
   <build_depend>velodyne_pointcloud</build_depend>
   <exec_depend>message_runtime</exec_depend>
   <depend>std_msgs</depend>
-  <depend>icp_localizer_msg</depend>
+  <depend>localization_msgs</depend>
   <export>
   </export>
 </package>

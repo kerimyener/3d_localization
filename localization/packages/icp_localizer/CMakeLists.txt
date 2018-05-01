@@ -7,17 +7,16 @@ find_package(catkin REQUIRED COMPONENTS
 #  sensor_msgs
   pcl_conversions
   velodyne_pointcloud
-  message_generation
+  localization_msgs
 )
-add_message_files(FILES icp_stat.msg)
-generate_messages(DEPENDENCIES std_msgs)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ndt_pcl
-  CATKIN_DEPENDS std_msgs message_runtime
+  CATKIN_DEPENDS std_msgs localization_msgs
 #  DEPENDS system_lib
 )
 
@@ -32,5 +31,8 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(icp_matching nodes/icp_matching/icp_matching.cpp)
 
 target_link_libraries(icp_matching ${catkin_LIBRARIES})
+
+add_dependencies(icp_matching localization_msgs_generate_messages_cpp)
+
 
 
