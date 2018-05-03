@@ -1,0 +1,17 @@
+localizer: velodyne
+tf_x: -0.175
+tf_y: 0.0
+tf_z: 2.03
+tf_roll: 0.0
+tf_pitch: 0.0
+tf_yaw: 0.7
+resolution: 1.0
+step_size: 0.1
+trans_epsilon: 0.01  
+max_iterations: 30
+leaf_size: 2.0
+min_scan_range: 5.0 
+min_add_scan_shift: 1.0
+filter_resolution: 0.2
+filename: dfki.pcd
+topic_name: velodyne/velodyne_points

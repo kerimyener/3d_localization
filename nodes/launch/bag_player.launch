@@ -1,5 +1,7 @@
 <launch>  
+<param name="use_sim_time" value="true" />
+
     <node
-     pkg="rosbag" type="play" name="player" output="screen" args="--clock /home/kyyurtdas/Documents/2018-03-20-17-49-05_new.bag">
+     pkg="rosbag" type="play" name="player" output="screen" args="--clock /media/kyyurtdas/80F2D7A4F2D79D2A/localization/2018-05-03-DFKI-Rh_street_test/1_run_slow_10kmph.bag">
     </node>
 </launch>

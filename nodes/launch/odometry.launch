@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="ros_mia_odometry" type="ros_mia_odometry_node" name="odometry" />
+ </launch>
