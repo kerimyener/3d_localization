@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
     ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
     ros::Subscriber ndt_map_sub = nh.subscribe("ndt_map", 100000, ndt_map_callback);
-    pub = nh.advertise<std_msgs::Bool>("save",10);
+    pub = nh.advertise<std_msgs::Bool>("save",100000);
     ros::spin();
 
     return 0;

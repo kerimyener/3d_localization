@@ -835,7 +835,7 @@ int main(int argc, char** argv)
 
   param_callback(nh);
   //ros::Subscriber param_sub = nh.subscribe("config/ndt_mapping", 10, param_callback);
-  ros::Subscriber output_sub = nh.subscribe("/save", 10, output_callback);
+  ros::Subscriber output_sub = nh.subscribe("/save", 10000, output_callback);
   ros::Subscriber points_sub = nh.subscribe(topic_name, 100000, points_callback);
   ros::Subscriber odom_sub = nh.subscribe("/odom_pose", 100000, odom_callback);
   ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
