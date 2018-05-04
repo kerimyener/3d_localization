@@ -63,8 +63,10 @@ static void ndt_map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     pub.publish(save);
     std::cout << "(Processed/Input): (" << dequeue << " / " << enqueue << ")" << std::endl;
     count ++;
+    dequeue++;
   }
-  dequeue++;
+  else
+    dequeue++;
 }
 
 int main(int argc, char **argv)
