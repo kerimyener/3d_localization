@@ -16,19 +16,19 @@
   <param name="base_link_frame" value="base_link"/>
   <param name="world_frame" value="odom"/>
    
-  <!--param name="odom0" value="odom"/-->
-  <param name="imu0" value="xsens/mt0/imu/data"/> 
-  <param name="imu1" value="xsens/mt1/imu/data"/>
+  <param name="odom0" value="odom"/>
+  <!--param name="imu0" value="xsens/mt0/imu/data"/>
+  <param name="imu1" value="xsens/mt1/imu/data"/-->
 
 
-<!--rosparam param="odom0_config">[true,  true,  false,
+<rosparam param="odom0_config">[true,  true,  false,
                                 false, false, true,
                                 true,  false, false,
                                 false, false, true,
-                                false, false, false]</rosparam-->
+                                false, false, false]</rosparam>
 
 
-<rosparam param="imu0_config">[false, false, false,
+<!--rosparam param="imu0_config">[false, false, false,
                                  true,  true,  true, 
                                  false, false, false, 
                                  true,  true,  true,
@@ -49,7 +49,7 @@
 
   <param name="imu1_remove_gravitational_acceleration" value="true"/>
 
-  <param name="print_diagnostics" value="false"/>
+  <param name="print_diagnostics" value="false"/-->
 
   <!-- ======== ADVANCED PARAMETERS ======== -->
 
@@ -91,7 +91,7 @@
                                                       0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]</rosparam>
 
 </node>
-
+<!--
 <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
 
   <remap from="/gps/fix" to="xsens/mt0/fix"/>
@@ -105,6 +105,6 @@
 
   <param name="publish_filtered_gps" value="false"/>
 
-</node>
+</node-->
 
 </launch>
