@@ -1,4 +1,7 @@
 <launch>
+  <node pkg="tf" type="static_transform_publisher" name="worl_to_map" args="0 0 0 0 0 0 /map /odom 10" />
+  <include file="$(find nodes)/launch/odometry.launch"/>
+  <!--include file="$(find nodes)/launch/navsat_transform_template.launch"/-->
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
     <rosparam command="load" file="$(find nodes)/param/ekf_template.yaml" />
 
