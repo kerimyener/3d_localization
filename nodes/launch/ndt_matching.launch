@@ -2,13 +2,13 @@
 
   <arg name="use_gnss" default="0" />
   <arg name="use_imu" default="false" />
-  <arg name="use_odom" default="false" />
+  <arg name="use_odom" default="true" />
   <arg name="imu_upside_down" default="false" />
   <arg name="queue_size" default="10" />
   <arg name="offset" default="linear" />
   <arg name="get_height" default="false" />
   <arg name="sync" default="false" />
-  <arg name="imu_topic" default="/imu_raw" />
+  <arg name="imu_topic" default="xsens/mt0/imu/data" />
   <rosparam command="load" file="$(find nodes)/param/ndt_match_param.yaml"/>
   <node pkg="ndt_localizer" type="ndt_matching" name="ndt_matching" output="screen">
     <param name="use_gnss" value="$(arg use_gnss)" />
@@ -19,6 +19,7 @@
     <param name="offset" value="$(arg offset)" />
     <param name="get_height" value="$(arg get_height)" />
     <param name="imu_topic" value="$(arg imu_topic)" />
+    <remap from="/odom_pose" to="/odometry/filtered"/>
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
   </node>
 

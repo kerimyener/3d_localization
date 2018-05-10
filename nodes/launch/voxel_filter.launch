@@ -3,8 +3,8 @@
   <arg name="node_name" default="voxel_grid_filter" />
   <arg name="points_topic" default="/velodyne/velodyne_points" />
   <arg name="output_log" default="false" />
-  <arg name="voxel_leaf_size" default="2.0" />
-  <arg name="measurement_range" default="120" />
+  <arg name="voxel_leaf_size" default="5.0" />
+  <arg name="measurement_range" default="100" />
 
   <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)">
     <param name="points_topic" value="$(arg points_topic)" />

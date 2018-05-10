@@ -889,7 +889,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     // Set values for publishing pose
     predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
 
-    predict_pose_msg.header.frame_id = "/map";
+    predict_pose_msg.header.frame_id = "/odom";
     predict_pose_msg.header.stamp = current_scan_time;
     predict_pose_msg.pose.position.x = predict_pose.x;
     predict_pose_msg.pose.position.y = predict_pose.y;
@@ -902,7 +902,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     tf::Quaternion predict_q_imu;
     predict_q_imu.setRPY(predict_pose_imu.roll, predict_pose_imu.pitch, predict_pose_imu.yaw);
-    predict_pose_imu_msg.header.frame_id = "map";
+    predict_pose_imu_msg.header.frame_id = "odom";
     predict_pose_imu_msg.header.stamp = input->header.stamp;
     predict_pose_imu_msg.pose.position.x = predict_pose_imu.x;
     predict_pose_imu_msg.pose.position.y = predict_pose_imu.y;
@@ -915,7 +915,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     tf::Quaternion predict_q_odom;
     predict_q_odom.setRPY(predict_pose_odom.roll, predict_pose_odom.pitch, predict_pose_odom.yaw);
-    predict_pose_odom_msg.header.frame_id = "map";
+    predict_pose_odom_msg.header.frame_id = "odom";
     predict_pose_odom_msg.header.stamp = input->header.stamp;
     predict_pose_odom_msg.pose.position.x = predict_pose_odom.x;
     predict_pose_odom_msg.pose.position.y = predict_pose_odom.y;
@@ -928,7 +928,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     tf::Quaternion predict_q_imu_odom;
     predict_q_imu_odom.setRPY(predict_pose_imu_odom.roll, predict_pose_imu_odom.pitch, predict_pose_imu_odom.yaw);
-    predict_pose_imu_odom_msg.header.frame_id = "map";
+    predict_pose_imu_odom_msg.header.frame_id = "odom";
     predict_pose_imu_odom_msg.header.stamp = input->header.stamp;
     predict_pose_imu_odom_msg.pose.position.x = predict_pose_imu_odom.x;
     predict_pose_imu_odom_msg.pose.position.y = predict_pose_imu_odom.y;
@@ -941,7 +941,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     ndt_q.setRPY(ndt_pose.roll, ndt_pose.pitch, ndt_pose.yaw);
 
-    ndt_pose_msg.header.frame_id = "/map";
+    ndt_pose_msg.header.frame_id = "/odom";
     ndt_pose_msg.header.stamp = current_scan_time;
     ndt_pose_msg.pose.position.x = ndt_pose.x;
     ndt_pose_msg.pose.position.y = ndt_pose.y;
@@ -968,7 +968,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     localizer_q.setRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw);
 
-    localizer_pose_msg.header.frame_id = "/map";
+    localizer_pose_msg.header.frame_id = "/odom";
     localizer_pose_msg.header.stamp = current_scan_time;
     localizer_pose_msg.pose.position.x = localizer_pose.x;
     localizer_pose_msg.pose.position.y = localizer_pose.y;
@@ -989,7 +989,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
 
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/odom", "/base_link_ndt"));
 
 
     matching_end = std::chrono::system_clock::now();
@@ -999,7 +999,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Set values for /estimate_twist
     estimate_twist_msg.header.stamp = current_scan_time;
-    estimate_twist_msg.header.frame_id = "/base_link";
+    estimate_twist_msg.header.frame_id = "/base_link_ndt";
     estimate_twist_msg.twist.linear.x = current_velocity;
     estimate_twist_msg.twist.linear.y = 0.0;
     estimate_twist_msg.twist.linear.z = 0.0;
@@ -1137,7 +1137,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 }
 
-/*void* thread_func(void* args)
+void* thread_func(void* args)
 {
   ros::NodeHandle nh_map;
   ros::CallbackQueue map_callback_queue;
@@ -1150,7 +1150,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     map_callback_queue.callAvailable(ros::WallDuration());
     ros_rate.sleep();
   }
-}*/
+}
 
 int main(int argc, char** argv)
 {
@@ -1264,14 +1264,14 @@ int main(int argc, char** argv)
   param_callback(nh);
   //ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
   ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
+  //ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback);
   ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
   ros::Subscriber odom_sub = nh.subscribe("/odom_pose", _queue_size * 10, odom_callback);
   ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
-  //pthread_t thread;
-  //pthread_create(&thread, NULL, thread_func, NULL);
+  pthread_t thread;
+  pthread_create(&thread, NULL, thread_func, NULL);
 
   ros::spin();
 

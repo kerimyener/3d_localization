@@ -1,4 +1,5 @@
 <launch>
   <param name="/robot_description" command="cat $(find nodes)/config/mia.urdf"/>
+  <param name="/robot_description" command="cat $(find nodes)/config/mia_ndt.urdf"/>
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher_node"/>
 </launch>

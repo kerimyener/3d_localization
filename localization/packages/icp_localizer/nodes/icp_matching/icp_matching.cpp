@@ -39,6 +39,8 @@
 #include <fstream>
 #include <string>
 #include <chrono>
+#include <pthread.h>
+
 
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
@@ -104,7 +106,7 @@ static pcl::PointCloud<pcl::PointXYZ> map, add;
 
 // If the map is loaded, map_loaded will be 1.
 static int map_loaded = 0;
-static int _use_gnss = 1;
+static int _use_gnss = 0;
 static int init_pos_set = 0;
 
 static pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
@@ -682,6 +684,21 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 }
 
+void* thread_func(void* args)
+{
+  ros::NodeHandle nh_map;
+  ros::CallbackQueue map_callback_queue;
+  nh_map.setCallbackQueue(&map_callback_queue);
+
+  ros::Subscriber map_sub = nh_map.subscribe("points_map", 10, map_callback);
+  ros::Rate ros_rate(10);
+  while (nh_map.ok())
+  {
+    map_callback_queue.callAvailable(ros::WallDuration());
+    ros_rate.sleep();
+  }
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "icp_matching");
@@ -784,9 +801,12 @@ int main(int argc, char** argv)
   //ros::Subscriber param_sub = nh.subscribe("config/icp", 10, param_callback);
   param_callback(nh);
   ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  ros::Subscriber map_sub = nh.subscribe("points_map", 10, map_callback);
+  //ros::Subscriber map_sub = nh.subscribe("points_map", 10, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1000, initialpose_callback);
   ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
+
+  pthread_t thread;
+  pthread_create(&thread, NULL, thread_func, NULL);
 
   ros::spin();
 

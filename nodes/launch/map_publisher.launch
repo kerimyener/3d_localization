@@ -1,3 +1,3 @@
 <launch>
-  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="noupdate /home/kyyurtdas/Documents/dfki_RH5_full.pcd" />
+  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="noupdate /home/kyyurtdas/Documents/0.75_dfki_RH5_full.pcd" />
 </launch>
