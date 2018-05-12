@@ -112,7 +112,7 @@ static ros::Publisher predict_pose_imu_odom_pub;
 static geometry_msgs::PoseStamped predict_pose_imu_odom_msg;
 
 static ros::Publisher ndt_pose_pub;
-static geometry_msgs::PoseStamped ndt_pose_msg;
+static geometry_msgs::PoseWithCovarianceStamped ndt_pose_msg;
 
 // current_pose is published by vel_pose_mux
 /*
@@ -943,13 +943,13 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     ndt_pose_msg.header.frame_id = "/odom";
     ndt_pose_msg.header.stamp = current_scan_time;
-    ndt_pose_msg.pose.position.x = ndt_pose.x;
-    ndt_pose_msg.pose.position.y = ndt_pose.y;
-    ndt_pose_msg.pose.position.z = ndt_pose.z;
-    ndt_pose_msg.pose.orientation.x = ndt_q.x();
-    ndt_pose_msg.pose.orientation.y = ndt_q.y();
-    ndt_pose_msg.pose.orientation.z = ndt_q.z();
-    ndt_pose_msg.pose.orientation.w = ndt_q.w();
+    ndt_pose_msg.pose.pose.position.x = ndt_pose.x;
+    ndt_pose_msg.pose.pose.position.y = ndt_pose.y;
+    ndt_pose_msg.pose.pose.position.z = ndt_pose.z;
+    ndt_pose_msg.pose.pose.orientation.x = ndt_q.x();
+    ndt_pose_msg.pose.pose.orientation.y = ndt_q.y();
+    ndt_pose_msg.pose.pose.orientation.z = ndt_q.z();
+    ndt_pose_msg.pose.pose.orientation.w = ndt_q.w();
 
 
     current_q.setRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
@@ -1249,7 +1249,7 @@ int main(int argc, char** argv)
   predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
   predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
-  ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
+  ndt_pose_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/ndt_pose", 10);
   // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);

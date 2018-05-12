@@ -11,11 +11,12 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>velodyne_pointcloud</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
 
   <run_depend>sensor_msgs</run_depend>
   <run_depend>velodyne_pointcloud</run_depend>
   <run_depend>message_runtime</run_depend>
-  
+  <run_depend>dynamic_reconfigure</run_depend>
   <export>
   </export>
 </package>

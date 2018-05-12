@@ -6,7 +6,7 @@
   <arg name="voxel_leaf_size" default="5.0" />
   <arg name="measurement_range" default="100" />
 
-  <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)">
+  <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)" output="screen">
     <param name="points_topic" value="$(arg points_topic)" />
     <param name="voxel_leaf_size" value="$(arg voxel_leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />

@@ -1,26 +1,18 @@
 <launch>
+  <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+
+        <remap from="cloud_in" to="/ibeo_scala_b3/ibeo_pointcloud"/>
+  </node>
   <node pkg="gmapping" type="slam_gmapping" name="gmapping" output="screen">
-    <remap from="/scan" to="/velodyne/velodyne_scan" />
     <rosparam>
-odom_frame: odom
-#map_update_interval: 1.0 # in seconds
-#particles: 200
-#throttle_scans: 5
-#ogain: 1.0
-#minimumScore: 250
-#kernelSize: 1
-#lsigma: .05
-#srr: 0.01
-#srt: 0.01
-#str: 0.01
-#stt: 0.01
-#resampleThreshold: 5
-#llsamplerange: 0.5
-#llsamplestep
-#lasamplerange: 0.25
-#astep: 0.1
-#lstep: 0.1
-#iterations: 10
+        odom_frame: odom
+        delta: 0.025
+        minimumScore: 50
+        maxRange: 5.5
+        maxUrange: 5.5
+        linearUpdate: 0.2
+        angularUpdate: 0.25
+        temporalUpdate: 5
     </rosparam>
   </node>
 </launch>

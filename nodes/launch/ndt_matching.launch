@@ -20,6 +20,7 @@
     <param name="get_height" value="$(arg get_height)" />
     <param name="imu_topic" value="$(arg imu_topic)" />
     <remap from="/odom_pose" to="/odometry/filtered"/>
+    <remap from="/points_raw" to="filtered_points"  />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
   </node>
 
