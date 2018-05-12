@@ -39,8 +39,6 @@ void Dyncallback(DynConfig::DynCfgVoxelConfig &config, uint32_t level) {
 }
 static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
-  ROS_INFO_STREAM("deneme"<<voxel_leaf_size);
-
   pcl::PointCloud<pcl::PointXYZI> scan;
   pcl::fromROSMsg(*input, scan);
 
@@ -130,7 +128,6 @@ int main(int argc, char** argv)
 	  filename = "voxel_grid_filter_" + std::string(buffer) + ".csv";
 	  ofs.open(filename.c_str(), std::ios::app);
   }
- ROS_INFO("deneme",voxel_leaf_size);
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>("/filtered_points", 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
