@@ -13,21 +13,17 @@ roslaunch nodes map_publisher.launch &
 
 sleep 10s
 
-roslaunch nodes tf_world_map.launch &
+#roslaunch nodes tf_world_map.launch &
 roslaunch nodes voxel_filter.launch &
 #roslaunch nodes odometry.launch &
 roslaunch nodes ekf_wheel_imu.launch &
-roslaunch nodes navsat_transform_template.launch &
+#roslaunch nodes navsat_transform_template.launch &
 
 roslaunch nodes ndt_matching.launch &
-roslaunch nodes ekf_wheel_imu_ndt.launch &
+#roslaunch nodes ekf_wheel_imu_ndt.launch &
 #roslaunch nodes icp_matching.launch &
 rviz&
-roslaunch nodes bag_player.launch 
-rosnode kill points_map_loader
-rosnode kill worl_to_map
-rosnide kill voxel_grid_filter
-rosnode kill base_link_to_localizer
-rosnode kill ndt_matching
+roslaunch nodes bag_player.launch
+
 
 

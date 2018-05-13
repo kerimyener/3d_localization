@@ -18,7 +18,7 @@
             <geometry>
                 <mesh filename="package://nodes/config/mia.stl" scale="0.001 0.001 0.001" />
             </geometry>
-            <material name="light grey">
+            <material name="light blue">
                 <color rgba="0.8 0.8 .8 1"/>
             </material>
         </visual>
