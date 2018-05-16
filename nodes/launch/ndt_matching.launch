@@ -2,7 +2,7 @@
 
   <arg name="use_gnss" default="0" />
   <arg name="use_imu" default="false" />
-  <arg name="use_odom" default="false" />
+  <arg name="use_odom" default="true" />
   <arg name="imu_upside_down" default="false" />
   <arg name="queue_size" default="10" />
   <arg name="offset" default="linear" />

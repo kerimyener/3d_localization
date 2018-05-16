@@ -1300,7 +1300,7 @@ int main(int argc, char** argv)
   time_ndt_matching_pub = nh.advertise<std_msgs::Float32>("/time_ndt_matching", 10);
   ndt_stat_pub = nh.advertise<localization_msgs::ndt_stat>("/ndt_stat", 10);
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
-  odom_pub = nh.advertise<nav_msgs::Odometry>("laser_odometry", 10);
+  odom_pub = nh.advertise<nav_msgs::Odometry>("odometry/laser", 10);
   // Subscribers
   param_callback(nh);
   //ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
