@@ -1,3 +1,5 @@
 <launch>
-	<node pkg="ros_mia_odometry" type="ros_mia_odometry_node" name="odometry" />
+        <node pkg="ros_mia_odometry" type="ros_mia_odometry_node" name="odometry" >
+            <remap from="odom" to="odometry/wheel"/>
+        </node>
  </launch>

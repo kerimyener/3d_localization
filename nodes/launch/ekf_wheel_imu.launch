@@ -1,7 +1,7 @@
 <launch>
 
   <include file="$(find nodes)/launch/odometry.launch"/>
-  <include file="$(find nodes)/launch/navsat_transform_template.launch"/>
+  <!--include file="$(find nodes)/launch/navsat_transform_template.launch"/-->
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
     <rosparam command="load" file="$(find nodes)/param/ekf_wheel_imu.yaml" />
 

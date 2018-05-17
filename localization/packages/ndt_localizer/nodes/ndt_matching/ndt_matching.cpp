@@ -312,12 +312,12 @@ static void param_callback(ros::NodeHandle nh)
   }
 }
 
-static void odomPub (ros::Time current){
+static void odomPub (ros::Time current, double x, double y, double yaw, double vx, double vy, double vz){
     tf::TransformBroadcaster odom_broadcaster;
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(current_pose.yaw);
+    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(yaw);
 
     //first, we'll publish the transform over tf
-    geometry_msgs::TransformStamped odom_trans;
+    /*geometry_msgs::TransformStamped odom_trans;
     odom_trans.header.stamp = current;
     odom_trans.header.frame_id = "map";
     odom_trans.child_frame_id = "base_link";
@@ -326,7 +326,7 @@ static void odomPub (ros::Time current){
     odom_trans.transform.translation.y = current_pose.y;
     odom_trans.transform.translation.z = current_pose.z;
     odom_trans.transform.rotation = odom_quat;
-    odom_broadcaster.sendTransform(odom_trans);
+    odom_broadcaster.sendTransform(odom_trans);*/
 
     //next, we'll publish the odometry message over ROS
     nav_msgs::Odometry odom;
@@ -334,16 +334,16 @@ static void odomPub (ros::Time current){
     odom.header.frame_id = "map";
 
     //set the position
-    odom.pose.pose.position.x = current_pose.x;
-    odom.pose.pose.position.y = current_pose.y;
-    odom.pose.pose.position.z = current_pose.z;
+    odom.pose.pose.position.x = x;
+    odom.pose.pose.position.y = y;
+    odom.pose.pose.position.z = 0.0;
     odom.pose.pose.orientation = odom_quat;
 
     //set the velocity
     odom.child_frame_id = "base_link";
-    odom.twist.twist.linear.x = current_velocity_x;
-    odom.twist.twist.linear.y = current_velocity_y;
-    odom.twist.twist.angular.z = angular_velocity;
+    odom.twist.twist.linear.x = vx;
+    odom.twist.twist.linear.y = vy;
+    odom.twist.twist.angular.z = vz;
 
     //publish the message
     odom_pub.publish(odom);
@@ -1028,9 +1028,9 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
 
-    odomPub(current_scan_time);
+    odomPub(current_scan_time, current_pose.x, current_pose.y, current_pose.yaw, current_velocity_x, current_velocity_y, angular_velocity);
 
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link_ndt"));
+    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
 
     matching_end = std::chrono::system_clock::now();
     exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
@@ -1039,7 +1039,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Set values for /estimate_twist
     estimate_twist_msg.header.stamp = current_scan_time;
-    estimate_twist_msg.header.frame_id = "/base_link_ndt";
+    estimate_twist_msg.header.frame_id = "/base_link";
     estimate_twist_msg.twist.linear.x = current_velocity;
     estimate_twist_msg.twist.linear.y = 0.0;
     estimate_twist_msg.twist.linear.z = 0.0;
