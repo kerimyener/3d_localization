@@ -13,11 +13,12 @@ roslaunch nodes map_publisher.launch &
 
 sleep 3s
 
+#roslaunch nodes gps2pose.launch &
 roslaunch nodes tf_world_map.launch &
 roslaunch nodes voxel_filter.launch &
 #roslaunch nodes odometry.launch &
 roslaunch nodes ekf_wheel_imu.launch &
-#roslaunch nodes navsat_transform_template.launch &
+roslaunch nodes navsat_transform_template.launch &
 
 roslaunch nodes ndt_matching.launch &
 roslaunch nodes ekf_wheel_imu_ndt.launch &

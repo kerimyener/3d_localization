@@ -3,7 +3,7 @@ sensor_timeout: 0.1
 two_d_mode: true
 transform_time_offset: 0.0
 transform_timeout: 0.0
-publish_tf: false
+publish_tf: true
 print_diagnostics: true
 debug: false
 
@@ -23,7 +23,7 @@ odom0_nodelay: true
 odom0_differential: false
 odom0_relative: false
 
-imu0: xsens/mt0/imu/data
+imu0: /xsens/mt0/imu/data
 imu0_config: [false, false, false,
               true,  true,  true,
               false, false, false,

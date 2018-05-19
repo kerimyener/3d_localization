@@ -385,14 +385,14 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 }
 
-static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
+static void gnss_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& input)
 {
-  tf::Quaternion gnss_q(input->pose.orientation.x, input->pose.orientation.y, input->pose.orientation.z,
-                        input->pose.orientation.w);
+  tf::Quaternion gnss_q(input->pose.pose.orientation.x, input->pose.pose.orientation.y, input->pose.pose.orientation.z,
+                        input->pose.pose.orientation.w);
   tf::Matrix3x3 gnss_m(gnss_q);
-  current_gnss_pose.x = input->pose.position.x;
-  current_gnss_pose.y = input->pose.position.y;
-  current_gnss_pose.z = input->pose.position.z;
+  current_gnss_pose.x = input->pose.pose.position.x;
+  current_gnss_pose.y = input->pose.pose.position.y;
+  current_gnss_pose.z = input->pose.pose.position.z;
   gnss_m.getRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
 
   if ((_use_gnss == 1 && init_pos_set == 0) || fitness_score >= 500.0)

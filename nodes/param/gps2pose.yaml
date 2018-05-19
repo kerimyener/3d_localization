@@ -1,0 +1,21 @@
+trust_gps: false
+frame_id: map
+tf_child_frame_id: /base_link
+publish_pose: true
+
+
+
+
+fixed_covariance:
+
+# in m^2
+  position:
+    x: 4 # +/- 2 m
+    y: 4 # +/- 2 m
+    z: 0.05 # ...
+
+# in rad^2
+  orientation:
+    x: 0.02 # +/- 10 deg
+    y: 0.02 # +/- 10 deg
+z: 0.11 # +/- 20 deg

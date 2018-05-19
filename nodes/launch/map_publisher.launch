@@ -1,3 +1,5 @@
 <launch>
-  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="noupdate /home/kyyurtdas/Documents/0.75_dfki_RH5_full.pcd" />
+<!--0.20_3d_jeddoloch_ndt_full_mapping.pcd
+    0.25_dfki_RH5_full.pcd-->
+  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="noupdate /home/kyyurtdas/Documents/0.20_3d_jeddoloch_ndt_full_mapping.pcd" />
 </launch>
