@@ -46,8 +46,10 @@ SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 add_executable(ndt_matching nodes/ndt_matching/ndt_matching.cpp)
 add_executable(ndt_mapping nodes/ndt_mapping/ndt_mapping.cpp)
+add_executable(ndt_dnm nodes/ndt_matching/localization.cc nodes/ndt_matching/ndt_node.cpp)
 target_link_libraries(ndt_matching ${catkin_LIBRARIES})
 target_link_libraries(ndt_mapping ${catkin_LIBRARIES})
+target_link_libraries(ndt_dnm ${catkin_LIBRARIES})
 add_dependencies(ndt_matching localization_msgs_generate_messages_cpp)
 
 

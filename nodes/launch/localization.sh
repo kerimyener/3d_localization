@@ -25,6 +25,7 @@ roslaunch nodes ekf_wheel_imu_ndt.launch &
 #roslaunch nodes icp_matching.launch &
 rviz&
 roslaunch nodes bag_player.launch
+rosnode kill -all
 
 
 
