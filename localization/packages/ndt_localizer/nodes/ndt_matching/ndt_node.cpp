@@ -1,12 +1,9 @@
-#include "localization.h"
+#include "common.hh"
 using namespace localizer;
-
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "ndt_matching");
-  core ndt_core;
-  ndt_core.toInitNdt();
-
+  core NDT_core;
+    NDT_core.toInitNDT();
   return 0;
-
 }

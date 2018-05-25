@@ -91,6 +91,10 @@ double _max_correspondence_distance = 1.0;
 double _euclidean_fitness_epsilon = 0.1;
 double _ransac_outlier_rejection_threshold = 1.0;
 static bool _imu_upside_down = false;
+static bool _use_imu = false;
+static bool _use_odom = false;
+static std::string _imu_topic = "/imu_raw";
+
 
 
 struct pose
@@ -104,8 +108,7 @@ struct pose
 };
 
 static pose initial_pose, predict_pose, previous_pose, icp_pose, current_pose, localizer_pose, previous_gnss_pose, current_gnss_pose;
-static pose predict_pose_imu, predict_pose_odom, predict_pose_imu_odom,
-ndt_pose, current_pose_imu, current_pose_odom, current_pose_imu_odom;
+static pose predict_pose_imu, predict_pose_odom, predict_pose_imu_odom, current_pose_imu, current_pose_odom, current_pose_imu_odom;
 
   // current_pos - previous_pose
 static double offset_imu_x, offset_imu_y, offset_imu_z, offset_imu_roll, offset_imu_pitch, offset_imu_yaw;
@@ -137,6 +140,15 @@ static double ransac_outlier_rejection_threshold = 1.0;
 static ros::Publisher predict_pose_pub;
 static geometry_msgs::PoseStamped predict_pose_msg;
 
+static ros::Publisher predict_pose_imu_pub;
+static geometry_msgs::PoseStamped predict_pose_imu_msg;
+
+static ros::Publisher predict_pose_odom_pub;
+static geometry_msgs::PoseStamped predict_pose_odom_msg;
+
+static ros::Publisher predict_pose_imu_odom_pub;
+static geometry_msgs::PoseStamped predict_pose_imu_odom_msg;
+
 static ros::Publisher icp_pose_pub;
 static geometry_msgs::PoseStamped icp_pose_msg;
 
@@ -147,6 +159,8 @@ static geometry_msgs::PoseStamped localizer_pose_msg;
 
 static ros::Publisher estimate_twist_pub;
 static geometry_msgs::TwistStamped estimate_twist_msg;
+
+static ros::Publisher odom_pub;
 
 static ros::Time current_scan_time;
 static ros::Time previous_scan_time;
@@ -278,6 +292,44 @@ static void param_callback(ros::NodeHandle nh)
   max_correspondence_distance = _max_correspondence_distance;
   euclidean_fitness_epsilon = _euclidean_fitness_epsilon;
   ransac_outlier_rejection_threshold = _ransac_outlier_rejection_threshold;
+
+}
+
+static void odomPub (ros::Time current, double x, double y, double yaw, double vx, double vy, double vz){
+    tf::TransformBroadcaster odom_broadcaster;
+    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(yaw);
+
+    //first, we'll publish the transform over tf
+    /*geometry_msgs::TransformStamped odom_trans;
+    odom_trans.header.stamp = current;
+    odom_trans.header.frame_id = "map";
+    odom_trans.child_frame_id = "base_link";
+
+    odom_trans.transform.translation.x = current_pose.x;
+    odom_trans.transform.translation.y = current_pose.y;
+    odom_trans.transform.translation.z = current_pose.z;
+    odom_trans.transform.rotation = odom_quat;
+    odom_broadcaster.sendTransform(odom_trans);*/
+
+    //next, we'll publish the odometry message over ROS
+    nav_msgs::Odometry odom;
+    odom.header.stamp = current;
+    odom.header.frame_id = "map";
+
+    //set the position
+    odom.pose.pose.position.x = x;
+    odom.pose.pose.position.y = y;
+    odom.pose.pose.position.z = 0.0;
+    odom.pose.pose.orientation = odom_quat;
+
+    //set the velocity
+    odom.child_frame_id = "base_link";
+    odom.twist.twist.linear.x = vx;
+    odom.twist.twist.linear.y = vy;
+    odom.twist.twist.angular.z = vz;
+
+    //publish the message
+    odom_pub.publish(odom);
 
 }
 
@@ -641,6 +693,23 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     predict_pose.pitch = previous_pose.pitch;
     predict_pose.yaw = previous_pose.yaw + offset_yaw;
 
+    if (_use_imu == true && _use_odom == true)
+      imu_odom_calc(current_scan_time);
+    if (_use_imu == true && _use_odom == false)
+      imu_calc(current_scan_time);
+    if (_use_imu == false && _use_odom == true)
+      odom_calc(current_scan_time);
+
+    pose predict_pose_for_icp;
+    if (_use_imu == true && _use_odom == true)
+      predict_pose_for_icp = predict_pose_imu_odom;
+    else if (_use_imu == true && _use_odom == false)
+      predict_pose_for_icp = predict_pose_imu;
+    else if (_use_imu == false && _use_odom == true)
+      predict_pose_for_icp = predict_pose_odom;
+    else
+      predict_pose_for_icp = predict_pose;
+
     Eigen::Translation3f init_translation(predict_pose.x, predict_pose.y, predict_pose.z);
     Eigen::AngleAxisf init_rotation_x(predict_pose.roll, Eigen::Vector3f::UnitX());
     Eigen::AngleAxisf init_rotation_y(predict_pose.pitch, Eigen::Vector3f::UnitY());
@@ -723,12 +792,12 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     }
     else
     {
-      current_pose.x = predict_pose.x;
-      current_pose.y = predict_pose.y;
-      current_pose.z = predict_pose.z;
-      current_pose.roll = predict_pose.roll;
-      current_pose.pitch = predict_pose.pitch;
-      current_pose.yaw = predict_pose.yaw;
+      current_pose.x = predict_pose_for_icp.x;
+      current_pose.y = predict_pose_for_icp.y;
+      current_pose.z = predict_pose_for_icp.z;
+      current_pose.roll = predict_pose_for_icp.roll;
+      current_pose.pitch = predict_pose_for_icp.pitch;
+      current_pose.yaw = predict_pose_for_icp.yaw;
     }
 
     // Compute the velocity and acceleration
@@ -745,6 +814,32 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     current_velocity_y = diff_y / secs;
     current_velocity_z = diff_z / secs;
     angular_velocity = diff_yaw / secs;
+
+    current_pose_imu.x = current_pose.x;
+    current_pose_imu.y = current_pose.y;
+    current_pose_imu.z = current_pose.z;
+    current_pose_imu.roll = current_pose.roll;
+    current_pose_imu.pitch = current_pose.pitch;
+    current_pose_imu.yaw = current_pose.yaw;
+
+    current_velocity_imu_x = current_velocity_x;
+    current_velocity_imu_y = current_velocity_y;
+    current_velocity_imu_z = current_velocity_z;
+
+    current_pose_odom.x = current_pose.x;
+    current_pose_odom.y = current_pose.y;
+    current_pose_odom.z = current_pose.z;
+    current_pose_odom.roll = current_pose.roll;
+    current_pose_odom.pitch = current_pose.pitch;
+    current_pose_odom.yaw = current_pose.yaw;
+
+    current_pose_imu_odom.x = current_pose.x;
+    current_pose_imu_odom.y = current_pose.y;
+    current_pose_imu_odom.z = current_pose.z;
+    current_pose_imu_odom.roll = current_pose.roll;
+    current_pose_imu_odom.pitch = current_pose.pitch;
+    current_pose_imu_odom.yaw = current_pose.yaw;
+
 
     current_velocity_smooth = (current_velocity + previous_velocity + previous_previous_velocity) / 3.0;
     if (current_velocity_smooth < 0.2)
@@ -774,6 +869,45 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     predict_pose_msg.pose.orientation.y = predict_q.y();
     predict_pose_msg.pose.orientation.z = predict_q.z();
     predict_pose_msg.pose.orientation.w = predict_q.w();
+
+    tf::Quaternion predict_q_imu;
+    predict_q_imu.setRPY(predict_pose_imu.roll, predict_pose_imu.pitch, predict_pose_imu.yaw);
+    predict_pose_imu_msg.header.frame_id = "map";
+    predict_pose_imu_msg.header.stamp = input->header.stamp;
+    predict_pose_imu_msg.pose.position.x = predict_pose_imu.x;
+    predict_pose_imu_msg.pose.position.y = predict_pose_imu.y;
+    predict_pose_imu_msg.pose.position.z = predict_pose_imu.z;
+    predict_pose_imu_msg.pose.orientation.x = predict_q_imu.x();
+    predict_pose_imu_msg.pose.orientation.y = predict_q_imu.y();
+    predict_pose_imu_msg.pose.orientation.z = predict_q_imu.z();
+    predict_pose_imu_msg.pose.orientation.w = predict_q_imu.w();
+    predict_pose_imu_pub.publish(predict_pose_imu_msg);
+
+    tf::Quaternion predict_q_odom;
+    predict_q_odom.setRPY(predict_pose_odom.roll, predict_pose_odom.pitch, predict_pose_odom.yaw);
+    predict_pose_odom_msg.header.frame_id = "map";
+    predict_pose_odom_msg.header.stamp = input->header.stamp;
+    predict_pose_odom_msg.pose.position.x = predict_pose_odom.x;
+    predict_pose_odom_msg.pose.position.y = predict_pose_odom.y;
+    predict_pose_odom_msg.pose.position.z = predict_pose_odom.z;
+    predict_pose_odom_msg.pose.orientation.x = predict_q_odom.x();
+    predict_pose_odom_msg.pose.orientation.y = predict_q_odom.y();
+    predict_pose_odom_msg.pose.orientation.z = predict_q_odom.z();
+    predict_pose_odom_msg.pose.orientation.w = predict_q_odom.w();
+    predict_pose_odom_pub.publish(predict_pose_odom_msg);
+
+    tf::Quaternion predict_q_imu_odom;
+    predict_q_imu_odom.setRPY(predict_pose_imu_odom.roll, predict_pose_imu_odom.pitch, predict_pose_imu_odom.yaw);
+    predict_pose_imu_odom_msg.header.frame_id = "map";
+    predict_pose_imu_odom_msg.header.stamp = input->header.stamp;
+    predict_pose_imu_odom_msg.pose.position.x = predict_pose_imu_odom.x;
+    predict_pose_imu_odom_msg.pose.position.y = predict_pose_imu_odom.y;
+    predict_pose_imu_odom_msg.pose.position.z = predict_pose_imu_odom.z;
+    predict_pose_imu_odom_msg.pose.orientation.x = predict_q_imu_odom.x();
+    predict_pose_imu_odom_msg.pose.orientation.y = predict_q_imu_odom.y();
+    predict_pose_imu_odom_msg.pose.orientation.z = predict_q_imu_odom.z();
+    predict_pose_imu_odom_msg.pose.orientation.w = predict_q_imu_odom.w();
+    predict_pose_imu_odom_pub.publish(predict_pose_imu_odom_msg);
 
     icp_q.setRPY(icp_pose.roll, icp_pose.pitch, icp_pose.yaw);
     icp_pose_msg.header.frame_id = "/map";
@@ -811,6 +945,9 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     predict_pose_pub.publish(predict_pose_msg);
     icp_pose_pub.publish(icp_pose_msg);
     localizer_pose_pub.publish(localizer_pose_msg);
+
+    odomPub(current_scan_time, current_pose.x, current_pose.y, current_pose.yaw, current_velocity_x, current_velocity_y, angular_velocity);
+
 
     // Send TF "/base_link" to "/map"
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
@@ -943,6 +1080,7 @@ void* thread_func(void* args)
     map_callback_queue.callAvailable(ros::WallDuration());
     ros_rate.sleep();
   }
+  return nullptr;
 }
 
 int main(int argc, char** argv)
@@ -963,7 +1101,10 @@ int main(int argc, char** argv)
   // setting parameters
   private_nh.getParam("use_gnss", _use_gnss);
   private_nh.getParam("queue_size", _queue_size);
-  private_nh.getParam("offset", _offset);
+  private_nh.getParam("use_imu", _use_imu);
+  private_nh.getParam("use_odom", _use_odom);
+  private_nh.getParam("imu_upside_down", _imu_upside_down);
+  private_nh.getParam("imu_topic", _imu_topic);
 
   if (nh.getParam("localizer", _localizer) == false)
   {
@@ -1034,6 +1175,9 @@ int main(int argc, char** argv)
 
   // Publishers
   predict_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose", 1000);
+  predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
+  predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
+  predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
   icp_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/icp_pose", 1000);
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 1000);
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 1000);
@@ -1042,6 +1186,7 @@ int main(int argc, char** argv)
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 1000);
   time_icp_matching_pub = nh.advertise<std_msgs::Float32>("/time_icp_matching", 1000);
   icp_stat_pub = nh.advertise<localization_msgs::icp_stat>("/icp_stat", 1000);
+  odom_pub = nh.advertise<nav_msgs::Odometry>("odometry/laser", 10);
 
   // Subscribers
   //ros::Subscriber param_sub = nh.subscribe("config/icp", 10, param_callback);
@@ -1050,6 +1195,8 @@ int main(int argc, char** argv)
   //ros::Subscriber map_sub = nh.subscribe("points_map", 10, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1000, initialpose_callback);
   ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
+  ros::Subscriber odom_sub = nh.subscribe("/odom_pose", _queue_size * 10, odom_callback);
+  ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);

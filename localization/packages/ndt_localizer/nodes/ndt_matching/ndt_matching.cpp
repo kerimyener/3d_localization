@@ -1213,8 +1213,6 @@ int main(int argc, char** argv)
   // Geting parameters
   private_nh.getParam("use_gnss", _use_gnss);
   private_nh.getParam("queue_size", _queue_size);
-  private_nh.getParam("offset", _offset);
-  private_nh.getParam("get_height", _get_height);
   private_nh.getParam("use_imu", _use_imu);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
