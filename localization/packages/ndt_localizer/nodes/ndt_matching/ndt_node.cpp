@@ -1,9 +1,10 @@
-#include "common.hh"
-using namespace localizer;
-int main(int argc, char** argv)
+#include "localiser_core.h"
+
+int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "ndt_matching");
-  core NDT_core;
-    NDT_core.toInitNDT();
+  ros::init(argc, argv, "nmea2tfpose");
+  localiser::core ndt_core;
+  ndt_core.run();
+
   return 0;
 }

@@ -1,5 +1,5 @@
 trust_gps: false
-frame_id: map
+frame_id: world
 tf_child_frame_id: /base_link
 publish_pose: true
 

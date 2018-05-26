@@ -5,6 +5,6 @@
 <param name="use_sim_time" value="true" />
 
     <node
-     pkg="rosbag" type="play" name="player"  args=" --clock  /home/kyyurtdas/Documents/2_run_20kmph.bag">
+     pkg="rosbag" type="play" name="player"  args=" --clock  /home/kyyurtdas/Documents/rosbags/2_run_20kmph.bag">
     </node>
 </launch>

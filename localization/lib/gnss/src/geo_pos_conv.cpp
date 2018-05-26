@@ -98,10 +98,10 @@ void geo_pos_conv::set_plane(int num)
   }
   else if (num == 7)
   {
-    lon_deg = 36;
+    lon_deg = 53;
     lon_min = 0;
-    lat_deg = 137;
-    lat_min = 10;
+    lat_deg = 8;
+    lat_min = 0;
   }
   else if (num == 8)
   {
